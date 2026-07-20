@@ -1,52 +1,42 @@
+use aoc_libraries::aoc_parse::{parser, prelude::*};
 use aoc_macros::aoc_submission;
 use aoc_utils::traits::generalised_output::UmiAteTheOutput;
 use aoc_utils::traits::parsable_input::ParsableInput;
 
 #[derive(Debug)]
 pub struct Board {
-    pub area: u32,
-    pub piece_counts: Vec<u32>,
+    pub area: usize,
+    pub piece_counts: Vec<usize>,
 }
 
 pub struct Input {
-    pub brick_areas: Vec<u32>,
+    pub brick_areas: Vec<usize>,
     pub boards: Vec<Board>,
 }
 
 impl ParsableInput for Input {
     fn from_raw_string(content: &str) -> Self {
-        let mut brick_areas = vec![];
-        let mut boards = vec![];
-        let mut current_brick_area = 0;
-
-        for line in content.lines() {
-            if let Some((dimensions, counts)) = line.split_once(": ") {
-                if current_brick_area > 0 {
-                    brick_areas.push(current_brick_area);
-                    current_brick_area = 0;
+        let piece_parser = parser!(sections(
+            line(usize ":")
+            lines(string(char_of(".#")+))
+        ));
+        let board_parser = parser!(lines(
+            width:usize "x" height:usize ": "
+            piece_counts:repeat_sep(usize, " ")
+                => Board {
+                    area: width * height,
+                    piece_counts,
                 }
-
-                let (width, height) = dimensions.split_once('x').unwrap();
-                let area = width.parse::<u32>().unwrap() * height.parse::<u32>().unwrap();
-                let piece_counts = counts
-                    .split_whitespace()
-                    .map(|count| count.parse().unwrap())
-                    .collect();
-                boards.push(Board { area, piece_counts });
-            } else if line.ends_with(':') {
-                if current_brick_area > 0 {
-                    brick_areas.push(current_brick_area);
-                    current_brick_area = 0;
-                }
-            } else {
-                current_brick_area +=
-                    line.chars().filter(|&character| character == '#').count() as u32;
-            }
-        }
-
-        if current_brick_area > 0 {
-            brick_areas.push(current_brick_area);
-        }
+        ));
+        let (pieces, boards) = parser!(piece_parser board_parser).parse(content).unwrap();
+        let brick_areas = pieces
+            .into_iter()
+            .map(|(_, rows)| {
+                rows.iter()
+                    .map(|row| row.chars().filter(|&character| character == '#').count())
+                    .sum()
+            })
+            .collect();
 
         Self {
             brick_areas,
@@ -103,7 +93,7 @@ pub fn part_1(input: Input) -> UmiAteTheOutput {
                 .iter()
                 .zip(&input.brick_areas)
                 .map(|(piece_count, brick_area)| piece_count * brick_area)
-                .sum::<u32>();
+                .sum::<usize>();
             board.area > required_area
         })
         .count();

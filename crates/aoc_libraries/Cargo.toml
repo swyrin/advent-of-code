@@ -4,7 +4,11 @@ edition.workspace = true
 version.workspace = true
 
 [dependencies]
+aoc-parse = "0.2.18"
 geo = "0.32.0"
 good_lp = { version = "1.14.2", default-features = false, features = ["microlp"] }
+itertools = "0.15.0"
 num = "0.4.3"
+pathfinding = "4.15.0"
 petgraph = { version = "0.8.3", features = ["rayon"] }
+range-set-blaze = "0.6.0"

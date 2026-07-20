@@ -1,3 +1,4 @@
+use aoc_libraries::pathfinding::matrix::Matrix;
 use aoc_macros::aoc_submission;
 use aoc_utils::traits::generalised_output::UmiAteTheOutput;
 use aoc_utils::traits::parsable_input::ParsableInput;
@@ -62,19 +63,15 @@ pub fn part_1(input: Input) -> UmiAteTheOutput {
     sample_out = 3263827
 )]
 pub fn part_2(input: Input) -> UmiAteTheOutput {
-    let content = input.content;
     let mut total = 0u128;
-    let lines: Vec<&str> = content.lines().collect();
-    let height = lines.len();
-    let width = lines[0].len();
+    let grid = Matrix::from_rows(input.content.lines().map(str::chars)).unwrap();
     let mut numbers: Vec<u32> = vec![];
 
-    for column in (0..width).rev() {
-        let number_count = height - 1;
+    for column in (0..grid.columns).rev() {
         let mut parsed_number = 0;
 
-        for line in lines.iter().take(number_count) {
-            let character = line.chars().nth(column).expect("Huh?");
+        for row in 0..grid.rows - 1 {
+            let character = grid[(row, column)];
 
             if character != ' ' {
                 parsed_number = parsed_number * 10 + character.to_digit(10).expect("NaN");
@@ -88,10 +85,7 @@ pub fn part_2(input: Input) -> UmiAteTheOutput {
 
         numbers.push(parsed_number);
 
-        let operand = lines[height - 1]
-            .chars()
-            .nth(column)
-            .expect("Did you turn off whitespace trim?");
+        let operand = grid[(grid.rows - 1, column)];
 
         if operand != ' ' {
             let is_multiplication = operand == '*';

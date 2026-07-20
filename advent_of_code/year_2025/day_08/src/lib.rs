@@ -1,8 +1,8 @@
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 
-use aoc_libraries::petgraph;
-use aoc_libraries::petgraph::algo;
-use aoc_libraries::petgraph::graph::UnGraph;
+use aoc_libraries::aoc_parse::{parser, prelude::*};
+use aoc_libraries::itertools::Itertools;
+use aoc_libraries::petgraph::unionfind::UnionFind;
 use aoc_macros::aoc_submission;
 use aoc_utils::traits::generalised_output::UmiAteTheOutput;
 use aoc_utils::traits::parsable_input::ParsableInput;
@@ -20,16 +20,6 @@ impl Point3 {
             + (self.y - other.y) * (self.y - other.y)
             + (self.z - other.z) * (self.z - other.z)
     }
-
-    pub fn from_line(line: &str) -> Self {
-        let numbers: Vec<&str> = line.trim().split(',').take(3).collect();
-
-        Self {
-            x: numbers[0].parse().unwrap(),
-            y: numbers[1].parse().unwrap(),
-            z: numbers[2].parse().unwrap(),
-        }
-    }
 }
 
 pub struct Input {
@@ -38,9 +28,24 @@ pub struct Input {
 
 impl ParsableInput for Input {
     fn from_raw_string(content: &str) -> Self {
-        let points = content.lines().map(Point3::from_line).collect();
+        let points = parser!(lines(
+            x:isize "," y:isize "," z:isize => Point3 { x, y, z }
+        ))
+        .parse(content)
+        .unwrap();
+
         Self { points }
     }
+}
+
+fn sorted_edges(points: &[Point3]) -> Vec<(isize, (usize, usize))> {
+    points
+        .iter()
+        .enumerate()
+        .array_combinations()
+        .map(|[(a_index, a), (b_index, b)]| (a.distance_from(b), (a_index, b_index)))
+        .sorted_unstable_by_key(|(distance, _)| *distance)
+        .collect()
 }
 
 #[aoc_submission(
@@ -69,27 +74,29 @@ impl ParsableInput for Input {
 )]
 pub fn part_1(input: Input) -> UmiAteTheOutput {
     let points = input.points;
-    let mut edges = BTreeMap::<isize, (u32, u32)>::new();
+    let edges = sorted_edges(&points);
+    let connection_count = if points.len() == 20 { 10 } else { 1000 };
+    let mut components = UnionFind::new(points.len());
 
-    for i in 0..points.len() {
-        for j in (i + 1)..points.len() {
-            let distance = points[i].distance_from(&points[j]);
-            edges.insert(distance, (i as u32, j as u32));
-        }
+    for &(_, (a, b)) in edges.iter().take(connection_count) {
+        components.union(a, b);
     }
 
-    // The puzzle sample asks for 10 connections; the full input asks for 1000.
-    let connection_count = if points.len() == 20 { 10 } else { 1000 };
-    let graph = UnGraph::<u32, ()>::from_edges(edges.values().take(connection_count));
+    let mut component_sizes = HashMap::new();
+    for point in 0..points.len() {
+        *component_sizes
+            .entry(components.find_mut(point))
+            .or_insert(0_usize) += 1;
+    }
 
-    let mut component_sizes: Vec<usize> = petgraph::algo::kosaraju_scc(&graph)
-        .iter()
-        .map(|component| component.len())
-        .collect();
-
-    component_sizes.sort_unstable();
-
-    UmiAteTheOutput::from_number(component_sizes.iter().rev().take(3).product::<usize>())
+    UmiAteTheOutput::from_number(
+        component_sizes
+            .values()
+            .sorted_unstable()
+            .rev()
+            .take(3)
+            .product::<usize>(),
+    )
 }
 
 #[aoc_submission(
@@ -118,28 +125,19 @@ pub fn part_1(input: Input) -> UmiAteTheOutput {
 )]
 pub fn part_2(input: Input) -> UmiAteTheOutput {
     let points = input.points;
-    let mut graph = UnGraph::<u32, ()>::new_undirected();
-    let mut edges = BTreeMap::<isize, (u32, u32)>::new();
+    let edges = sorted_edges(&points);
+    let mut components = UnionFind::new(points.len());
+    let mut component_count = points.len();
 
-    for i in 0..points.len() {
-        for j in (i + 1)..points.len() {
-            let distance = points[i].distance_from(&points[j]);
-            edges.insert(distance, (i as u32, j as u32));
+    for (_, (a, b)) in edges {
+        if components.union(a, b) {
+            component_count -= 1;
+        }
+
+        if component_count == 1 {
+            return UmiAteTheOutput::from_number(points[a].x * points[b].x);
         }
     }
 
-    for i in 0..points.len() {
-        graph.add_node(i as u32);
-    }
-
-    loop {
-        let edge = edges.pop_first().unwrap().1;
-        graph.add_edge(edge.0.into(), edge.1.into(), ());
-
-        if algo::connected_components(&graph) == 1 {
-            let a = points[edge.0 as usize].x;
-            let b = points[edge.1 as usize].x;
-            return UmiAteTheOutput::from_number(b * a);
-        }
-    }
+    unreachable!("all points should eventually be connected")
 }

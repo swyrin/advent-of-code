@@ -1,3 +1,4 @@
+use aoc_libraries::aoc_parse::{parser, prelude::*};
 use aoc_macros::aoc_submission;
 use aoc_utils::traits::generalised_output::UmiAteTheOutput;
 use aoc_utils::traits::parsable_input::ParsableInput;
@@ -8,16 +9,9 @@ pub struct Input {
 
 impl ParsableInput for Input {
     fn from_raw_string(content: &str) -> Self {
-        let ranges = content
-            .trim()
-            .split(',')
-            .map(|range| {
-                let parts: Vec<&str> = range.split('-').collect();
-                let head = parts[0].parse::<i64>().unwrap();
-                let tail = parts[1].parse::<i64>().unwrap();
-                (head, tail)
-            })
-            .collect();
+        let ranges = parser!(repeat_sep(i64 "-" i64, ","))
+            .parse(content.trim())
+            .unwrap();
 
         Self { ranges }
     }

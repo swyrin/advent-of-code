@@ -1,6 +1,8 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::hash::RandomState;
 
+use aoc_libraries::aoc_parse::{parser, prelude::*};
+use aoc_libraries::pathfinding::prelude::count_paths;
 use aoc_libraries::petgraph::algo::all_simple_paths;
 use aoc_libraries::petgraph::graph::{DiGraph, NodeIndex};
 use aoc_macros::aoc_submission;
@@ -19,15 +21,12 @@ pub struct Input {
 
 impl ParsableInput for Input {
     fn from_raw_string(content: &str) -> Self {
-        let entries = content
-            .lines()
-            .map(|line| {
-                let mut components = line.split_whitespace();
-                let from = components.next().unwrap().trim_end_matches(':').to_string();
-                let neighbors = components.map(str::to_string).collect();
-                Adjacent { from, neighbors }
-            })
-            .collect();
+        let entries = parser!(lines(
+            from:string(alnum+) ": " neighbors:repeat_sep(string(alnum+), " ")
+                => Adjacent { from, neighbors }
+        ))
+        .parse(content)
+        .unwrap();
 
         Self { entries }
     }
@@ -71,50 +70,6 @@ pub fn part_1(input: Input) -> UmiAteTheOutput {
     UmiAteTheOutput::from_number(path_count)
 }
 
-fn find_paths(
-    start: &str,
-    connections: &HashMap<String, HashSet<String>>,
-    cache: &mut HashMap<String, (usize, usize, usize, usize)>,
-) -> (usize, usize, usize, usize) {
-    if start == "out" {
-        return (0, 0, 0, 1);
-    }
-
-    if let Some(result) = cache.get(start) {
-        return *result;
-    }
-
-    let (mut dac_paths, mut fft_paths, mut both_paths, mut total_paths) = (0, 0, 0, 0);
-
-    if let Some(connected_devices) = connections.get(start) {
-        for connected_device in connected_devices {
-            let (child_dac_paths, child_fft_paths, child_both_paths, child_total_paths) =
-                find_paths(connected_device, connections, cache);
-
-            dac_paths += if start == "dac" {
-                child_total_paths
-            } else {
-                child_dac_paths
-            };
-            fft_paths += if start == "fft" {
-                child_total_paths
-            } else {
-                child_fft_paths
-            };
-            both_paths += match start {
-                "dac" => child_fft_paths,
-                "fft" => child_dac_paths,
-                _ => child_both_paths,
-            };
-            total_paths += child_total_paths;
-        }
-    }
-
-    let result = (dac_paths, fft_paths, both_paths, total_paths);
-    cache.insert(start.to_owned(), result);
-    result
-}
-
 #[aoc_submission(
     input_type = crate::Input,
     sample_in = r"svr: aaa bbb
@@ -133,11 +88,30 @@ hhh: out",
     sample_out = 2
 )]
 pub fn part_2(input: Input) -> UmiAteTheOutput {
-    let connections = input
+    let connections: HashMap<_, _> = input
         .entries
         .into_iter()
-        .map(|entry| (entry.from, HashSet::from_iter(entry.neighbors)))
+        .map(|entry| (entry.from, entry.neighbors))
         .collect();
 
-    UmiAteTheOutput::from_number(find_paths("svr", &connections, &mut HashMap::new()).2)
+    let path_count = count_paths(
+        ("svr".to_string(), false, false),
+        |(current, seen_dac, seen_fft)| {
+            connections
+                .get(current)
+                .into_iter()
+                .flatten()
+                .map(|next| {
+                    (
+                        next.clone(),
+                        *seen_dac || next == "dac",
+                        *seen_fft || next == "fft",
+                    )
+                })
+                .collect::<Vec<_>>()
+        },
+        |(current, seen_dac, seen_fft)| current == "out" && *seen_dac && *seen_fft,
+    );
+
+    UmiAteTheOutput::from_number(path_count)
 }
