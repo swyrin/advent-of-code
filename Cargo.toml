@@ -1,3 +1,23 @@
+[package]
+name = "advent-of-code"
+version.workspace = true
+edition.workspace = true
+homepage = "https://github.com/swyrin/advent-of-code"
+
 [workspace]
+members = ["crates/*", "advent_of_code/year_2025/*"]
 resolver = "3"
-members = ["aoc-0000", "aoc-lib", "aoc-macro", "aoc-2025"]
+
+[workspace.package]
+edition = "2024"
+version = "0.1.0"
+
+[workspace.dependencies]
+aoc_libraries = { path = "crates/aoc-libraries" }
+aoc_macros = { path = "crates/aoc-macros" }
+aoc_utils = { path = "crates/aoc-utils" }
+
+[dependencies]
+aoc_macros.workspace = true
+aoc_utils.workspace = true
+

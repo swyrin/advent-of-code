@@ -1,0 +1,13 @@
+[package]
+name = "aoc_macros"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+aoc_utils.workspace = true
+num-bigint = "0.5.1"
+quote = "1.0.42"
+syn = { version = "2", features = ["full"] }
+
+[lib]
+proc-macro = true

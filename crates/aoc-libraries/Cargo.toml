@@ -1,0 +1,10 @@
+[package]
+name = "aoc_libraries"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+geo = "0.32.0"
+good_lp = { version = "1.14.2", default-features = false, features = ["microlp"] }
+num = "0.4.3"
+petgraph = { version = "0.8.3", features = ["rayon"] }

@@ -1,0 +1,7 @@
+[package]
+name = "aoc_utils"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+num = "0.4.3"
