@@ -49,6 +49,8 @@ pub fn aoc_submission(args: TokenStream, input: TokenStream) -> TokenStream {
 
     let test_name = syn::Ident::new(&format!("test_method_{}", inner_name), inner_name.span());
     let mod_name = syn::Ident::new(&format!("test_module_{}", inner_name), inner_name.span());
+    let output_file_name =
+        syn::LitStr::new(&format!("output_{}.txt", inner_name), inner_name.span());
 
     let expanded = quote! {
         #[allow(dead_code)]
@@ -80,7 +82,7 @@ pub fn aoc_submission(args: TokenStream, input: TokenStream) -> TokenStream {
                 let test_result = match should_run_actual_test {
                     true => {
                         let output_private = format!("{}", output.answer);
-                        fs::write("output.txt", output_private).expect("Unable to write output.");
+                        fs::write(#output_file_name, output_private).expect("Unable to write output.");
                     },
                     false => {
                         let output_expected = AocOutput::from_number(#sample_out);
