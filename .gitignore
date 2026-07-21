@@ -2,3 +2,7 @@
 
 # for every child workspaces
 **/target
+
+# Advent of Code
+**/input.txt
+**/output.txt
