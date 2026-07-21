@@ -9,16 +9,20 @@ use types::submission::SubmissionArgs;
 /// Part code macro.
 /// Followed by a function that accepts `input_type` and `run_sample`.
 ///
+/// To run actual tests (personalised input), set `PRIVATE` environment variable to a truthy value.
+///
+/// Defaults to running sample test ("0").
+///
 /// # Example
 /// ```
 /// use aoc_macros::aoc_submission;
-/// use aoc_utils::traits::parsable_input::ParsableInput;
+/// use aoc_libraries::core::aoc_input::AocInput;
 ///
 /// pub struct Ligma {
 ///     pub x: isize,
 /// }
 ///
-/// impl ParsableInput for Ligma {
+/// impl AocInput for Ligma {
 ///     fn from_raw_string(content: &str) -> Self {
 ///         Self { x: 42 }
 ///     }
@@ -53,23 +57,40 @@ pub fn aoc_submission(args: TokenStream, input: TokenStream) -> TokenStream {
 
         #[cfg(test)]
         mod #mod_name {
-            use aoc_utils::traits::parsable_input::ParsableInput;
-            use aoc_utils::traits::generalised_output::UmiAteTheOutput;
+            use std::fs;
+            use aoc_libraries::utils::test_environment;
+            use aoc_libraries::core::aoc_input::AocInput;
+            use aoc_libraries::core::aoc_output::AocOutput;
 
             #[test]
             fn #test_name()
             where
-                #input_type : ParsableInput,
+                #input_type : AocInput,
             {
-                let input = <#input_type as ParsableInput>::from_raw_string(#sample_in);
+                let should_run_actual_test = test_environment::should_run_with_personalised_input();
 
-                let output_expected = UmiAteTheOutput::from_number(#sample_out);
-                let output_reality = crate::#inner_name(input);
+                let input = match should_run_actual_test {
+                    true => fs::read_to_string("input.txt").expect("Unable to read private input"),
+                    false => String::from(#sample_in)
+                };
 
-                assert_eq!(
-                    output_reality,
-                    output_expected
-                );
+                let input = #input_type::from_raw_string(&input);
+                let output = crate::#inner_name(input);
+
+                let test_result = match should_run_actual_test {
+                    true => {
+                        let output_private = format!("{}", output.answer);
+                        fs::write("output.txt", output_private).expect("Unable to write output.");
+                    },
+                    false => {
+                        let output_expected = AocOutput::from_number(#sample_out);
+
+                        assert_eq!(
+                            output,
+                            output_expected
+                        );
+                    }
+                };
             }
         }
     };
