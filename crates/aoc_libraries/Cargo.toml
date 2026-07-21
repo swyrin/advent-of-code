@@ -5,8 +5,10 @@ version.workspace = true
 
 [dependencies]
 aoc-parse = "0.2.18"
+counter   = "0.7.1"
 geo = "0.32.0"
 good_lp = { version = "1.14.2", default-features = false, features = ["microlp"] }
+image = { version = "0.25.10", default-features = false, features = ["png"] }
 itertools = "0.15.0"
 pathfinding = "4.15.0"
 petgraph = { version = "0.8.3", features = ["rayon"] }

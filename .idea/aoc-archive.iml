@@ -22,6 +22,20 @@
       <sourceFolder url="file://$MODULE_DIR$/crates/aoc_libraries/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/aoc_macros/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/aoc_utils/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/advent_of_code/year_2024/day_01/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/advent_of_code/year_2024/day_02/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/advent_of_code/year_2024/day_03/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/advent_of_code/year_2024/day_04/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/advent_of_code/year_2024/day_05/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/advent_of_code/year_2024/day_06/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/advent_of_code/year_2024/day_07/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/advent_of_code/year_2024/day_08/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/advent_of_code/year_2024/day_09/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/advent_of_code/year_2024/day_10/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/advent_of_code/year_2024/day_11/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/advent_of_code/year_2024/day_12/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/advent_of_code/year_2024/day_13/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/advent_of_code/year_2024/day_14/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/aoc-0000/target" />
       <excludeFolder url="file://$MODULE_DIR$/aoc-2025/target" />

@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/*", "advent_of_code/year_2025/*"]
+members = ["crates/*", "advent_of_code/year_2025/*", "advent_of_code/year_2024/*"]
 resolver = "3"
 
 [workspace.package]
