@@ -1,18 +1,17 @@
 use aoc_libraries::aoc_parse::{parser, prelude::*};
-use aoc_libraries::core::aoc_input::AocInput;
 use aoc_macros::aoc_submission;
 
 pub struct Input {
     pub ranges: Vec<(i64, i64)>,
 }
 
-impl AocInput for Input {
-    fn from_raw_string(content: &str) -> Self {
-        let ranges = parser!(repeat_sep(i64 "-" i64, ","))
-            .parse(content.trim())
-            .unwrap();
+impl std::str::FromStr for Input {
+    type Err = aoc_libraries::aoc_parse::ParseError;
 
-        Self { ranges }
+    fn from_str(content: &str) -> Result<Self, Self::Err> {
+        let ranges = parser!(repeat_sep(i64 "-" i64, ",")).parse(content.trim())?;
+
+        Ok(Self { ranges })
     }
 }
 

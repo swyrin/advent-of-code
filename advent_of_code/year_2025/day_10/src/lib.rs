@@ -1,5 +1,4 @@
 use aoc_libraries::aoc_parse::{parser, prelude::*};
-use aoc_libraries::core::aoc_input::AocInput;
 use aoc_libraries::good_lp::{
     Expression, IntoAffineExpression, Solution, SolverModel, Variable, microlp, variable, variables,
 };
@@ -16,8 +15,10 @@ pub struct Input {
     pub machines: Vec<Machine>,
 }
 
-impl AocInput for Input {
-    fn from_raw_string(content: &str) -> Self {
+impl std::str::FromStr for Input {
+    type Err = aoc_libraries::aoc_parse::ParseError;
+
+    fn from_str(content: &str) -> Result<Self, Self::Err> {
         let light = parser!({
             "." => false,
             "#" => true,
@@ -29,10 +30,9 @@ impl AocInput for Input {
             " {" jolts:repeat_sep(u32, ",") "}"
                 => Machine { target, toggles, jolts }
         ))
-        .parse(content)
-        .unwrap();
+        .parse(content)?;
 
-        Self { machines }
+        Ok(Self { machines })
     }
 }
 

@@ -1,5 +1,4 @@
 use aoc_libraries::aoc_parse::{parser, prelude::*};
-use aoc_libraries::core::aoc_input::AocInput;
 use aoc_libraries::geo::{Contains, LineString, Point, Polygon, Rect, point};
 use aoc_libraries::itertools::Itertools;
 use aoc_macros::aoc_submission;
@@ -8,11 +7,13 @@ pub struct Input {
     pub points: Vec<(i128, i128)>,
 }
 
-impl AocInput for Input {
-    fn from_raw_string(content: &str) -> Self {
-        let points = parser!(lines(i128 "," i128)).parse(content).unwrap();
+impl std::str::FromStr for Input {
+    type Err = aoc_libraries::aoc_parse::ParseError;
 
-        Self { points }
+    fn from_str(content: &str) -> Result<Self, Self::Err> {
+        let points = parser!(lines(i128 "," i128)).parse(content)?;
+
+        Ok(Self { points })
     }
 }
 

@@ -1,5 +1,4 @@
 use aoc_libraries::aoc_parse::{parser, prelude::*};
-use aoc_libraries::core::aoc_input::AocInput;
 use aoc_macros::aoc_submission;
 
 #[derive(Debug)]
@@ -13,8 +12,10 @@ pub struct Input {
     pub boards: Vec<Board>,
 }
 
-impl AocInput for Input {
-    fn from_raw_string(content: &str) -> Self {
+impl std::str::FromStr for Input {
+    type Err = aoc_libraries::aoc_parse::ParseError;
+
+    fn from_str(content: &str) -> Result<Self, Self::Err> {
         let piece_parser = parser!(sections(
             line(usize ":")
             lines(string(char_of(".#")+))
@@ -27,7 +28,7 @@ impl AocInput for Input {
                     piece_counts,
                 }
         ));
-        let (pieces, boards) = parser!(piece_parser board_parser).parse(content).unwrap();
+        let (pieces, boards) = parser!(piece_parser board_parser).parse(content)?;
         let brick_areas = pieces
             .into_iter()
             .map(|(_, rows)| {
@@ -37,10 +38,10 @@ impl AocInput for Input {
             })
             .collect();
 
-        Self {
+        Ok(Self {
             brick_areas,
             boards,
-        }
+        })
     }
 }
 

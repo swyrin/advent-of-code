@@ -1,5 +1,4 @@
 use aoc_libraries::aoc_parse::{parser, prelude::*};
-use aoc_libraries::core::aoc_input::AocInput;
 use aoc_libraries::range_set_blaze::RangeSetBlaze;
 use aoc_macros::aoc_submission;
 
@@ -8,14 +7,15 @@ pub struct Input {
     pub numbers: Vec<i64>,
 }
 
-impl AocInput for Input {
-    fn from_raw_string(content: &str) -> Self {
-        let (ranges, numbers) = parser!(section(lines(i64 "-" i64)) section(lines(i64)))
-            .parse(content)
-            .unwrap();
+impl std::str::FromStr for Input {
+    type Err = aoc_libraries::aoc_parse::ParseError;
+
+    fn from_str(content: &str) -> Result<Self, Self::Err> {
+        let (ranges, numbers) =
+            parser!(section(lines(i64 "-" i64)) section(lines(i64))).parse(content)?;
         let ranges = RangeSetBlaze::from_iter(ranges.into_iter().map(|(start, end)| start..=end));
 
-        Self { ranges, numbers }
+        Ok(Self { ranges, numbers })
     }
 }
 

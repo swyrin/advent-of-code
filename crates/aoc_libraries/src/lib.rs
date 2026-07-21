@@ -1,6 +1,5 @@
 //! This crate re-exports stuffs.
 
-pub mod core;
 pub mod utils;
 
 pub use aoc_parse;

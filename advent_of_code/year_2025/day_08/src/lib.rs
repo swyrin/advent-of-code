@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use aoc_libraries::aoc_parse::{parser, prelude::*};
-use aoc_libraries::core::aoc_input::AocInput;
 use aoc_libraries::itertools::Itertools;
 use aoc_libraries::petgraph::unionfind::UnionFind;
 use aoc_macros::aoc_submission;
@@ -25,15 +24,16 @@ pub struct Input {
     pub points: Vec<Point3>,
 }
 
-impl AocInput for Input {
-    fn from_raw_string(content: &str) -> Self {
+impl std::str::FromStr for Input {
+    type Err = aoc_libraries::aoc_parse::ParseError;
+
+    fn from_str(content: &str) -> Result<Self, Self::Err> {
         let points = parser!(lines(
             x:isize "," y:isize "," z:isize => Point3 { x, y, z }
         ))
-        .parse(content)
-        .unwrap();
+        .parse(content)?;
 
-        Self { points }
+        Ok(Self { points })
     }
 }
 

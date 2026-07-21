@@ -14,15 +14,16 @@ use types::submission::SubmissionArgs;
 /// # Example
 /// ```
 /// use aoc_macros::aoc_submission;
-/// use aoc_libraries::core::aoc_input::AocInput;
 ///
 /// pub struct Ligma {
 ///     pub x: isize,
 /// }
 ///
-/// impl AocInput for Ligma {
-///     fn from_raw_string(content: &str) -> Self {
-///         Self { x: 42 }
+/// impl std::str::FromStr for Ligma {
+///     type Err = std::num::ParseIntError;
+///
+///     fn from_str(content: &str) -> Result<Self, Self::Err> {
+///         Ok(Self { x: content.parse()? })
 ///     }
 /// }
 ///
@@ -67,16 +68,19 @@ pub fn aoc_submission(args: TokenStream, input: TokenStream) -> TokenStream {
         #[test]
         fn #test_name()
         where
-            #input_type : aoc_libraries::core::aoc_input::AocInput,
+            #input_type: std::str::FromStr,
+            <#input_type as std::str::FromStr>::Err: std::fmt::Display,
         {
             let should_run_actual_test = aoc_libraries::utils::test_environment::should_run_with_personalised_input();
 
-            let input = match should_run_actual_test {
+            let raw_input = match should_run_actual_test {
                 true => std::fs::read_to_string("input.txt").expect("Unable to read private input"),
                 false => String::from(#sample_in)
             };
 
-            let input = <#input_type as aoc_libraries::core::aoc_input::AocInput>::from_raw_string(&input);
+            let input = raw_input.parse::<#input_type>().unwrap_or_else(|error| {
+                panic!("Unable to parse input: {error}")
+            });
             let output = #inner_name(input).to_string();
 
             if should_run_actual_test {

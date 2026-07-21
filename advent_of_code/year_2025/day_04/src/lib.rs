@@ -1,4 +1,3 @@
-use aoc_libraries::core::aoc_input::AocInput;
 use aoc_libraries::pathfinding::matrix::Matrix;
 use aoc_macros::aoc_submission;
 
@@ -6,11 +5,14 @@ pub struct Input {
     pub grid: Matrix<char>,
 }
 
-impl AocInput for Input {
-    fn from_raw_string(content: &str) -> Self {
-        let grid = Matrix::from_rows(content.lines().map(str::chars)).unwrap();
+impl std::str::FromStr for Input {
+    type Err = String;
 
-        Self { grid }
+    fn from_str(content: &str) -> Result<Self, Self::Err> {
+        let grid = Matrix::from_rows(content.lines().map(str::chars))
+            .map_err(|error| format!("invalid grid: {error:?}"))?;
+
+        Ok(Self { grid })
     }
 }
 

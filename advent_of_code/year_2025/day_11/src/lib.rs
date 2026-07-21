@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::hash::RandomState;
 
 use aoc_libraries::aoc_parse::{parser, prelude::*};
-use aoc_libraries::core::aoc_input::AocInput;
 use aoc_libraries::pathfinding::prelude::count_paths;
 use aoc_libraries::petgraph::algo::all_simple_paths;
 use aoc_libraries::petgraph::graph::{DiGraph, NodeIndex};
@@ -18,16 +17,17 @@ pub struct Input {
     pub entries: Vec<Adjacent>,
 }
 
-impl AocInput for Input {
-    fn from_raw_string(content: &str) -> Self {
+impl std::str::FromStr for Input {
+    type Err = aoc_libraries::aoc_parse::ParseError;
+
+    fn from_str(content: &str) -> Result<Self, Self::Err> {
         let entries = parser!(lines(
             from:string(alnum+) ": " neighbors:repeat_sep(string(alnum+), " ")
                 => Adjacent { from, neighbors }
         ))
-        .parse(content)
-        .unwrap();
+        .parse(content)?;
 
-        Self { entries }
+        Ok(Self { entries })
     }
 }
 

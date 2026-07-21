@@ -1,21 +1,21 @@
 use aoc_libraries::aoc_parse::{parser, prelude::*};
-use aoc_libraries::core::aoc_input::AocInput;
 use aoc_macros::aoc_submission;
 
 pub struct Input {
     pub moves: Vec<(char, i32)>,
 }
 
-impl AocInput for Input {
-    fn from_raw_string(content: &str) -> Self {
+impl std::str::FromStr for Input {
+    type Err = aoc_libraries::aoc_parse::ParseError;
+
+    fn from_str(content: &str) -> Result<Self, Self::Err> {
         let moves = parser!(lines({
             "L" amount:i32 => ('L', amount),
             "R" amount:i32 => ('R', amount),
         }))
-        .parse(content)
-        .unwrap();
+        .parse(content)?;
 
-        Self { moves }
+        Ok(Self { moves })
     }
 }
 
