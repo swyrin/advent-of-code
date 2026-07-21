@@ -9,17 +9,16 @@ env:
 
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest, windows-latest ]
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: actions-rust-lang/setup-rust-toolchain@
+
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: nextest
 
       - name: Run tests
-        run: cargo test
+        run: cargo nextest run --workspace
