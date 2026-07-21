@@ -1,7 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
 use aoc_libraries::core::aoc_input::AocInput;
-use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_macros::aoc_submission;
 
 pub struct Input {
@@ -35,7 +34,7 @@ impl AocInput for Input {
 ...............",
     sample_out = 21
 )]
-pub fn part_1(input: Input) -> AocOutput {
+pub fn part_1(input: Input) -> impl std::fmt::Display {
     let mut required_columns = HashSet::new();
     let lines = input.content.lines();
 
@@ -70,7 +69,7 @@ pub fn part_1(input: Input) -> AocOutput {
         required_columns.extend(next_required_columns);
     }
 
-    AocOutput::from_number(total)
+    total
 }
 
 #[aoc_submission(
@@ -92,7 +91,7 @@ pub fn part_1(input: Input) -> AocOutput {
 ...............",
     sample_out = 40
 )]
-pub fn part_2(input: Input) -> AocOutput {
+pub fn part_2(input: Input) -> impl std::fmt::Display {
     // how many rays reach x
     let mut rays: HashMap<usize, u128> = HashMap::new();
     let lines = input.content.lines();
@@ -123,5 +122,5 @@ pub fn part_2(input: Input) -> AocOutput {
         rays = next_rays;
     }
 
-    AocOutput::from_number(rays.values().copied().sum::<u128>())
+    rays.values().copied().sum::<u128>()
 }

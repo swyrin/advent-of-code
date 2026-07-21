@@ -1,6 +1,5 @@
 use aoc_libraries::aoc_parse::{parser, prelude::*};
 use aoc_libraries::core::aoc_input::AocInput;
-use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_libraries::geo::{Contains, LineString, Point, Polygon, Rect, point};
 use aoc_libraries::itertools::Itertools;
 use aoc_macros::aoc_submission;
@@ -28,8 +27,8 @@ impl AocInput for Input {
 7,3",
     sample_out = 50
 )]
-pub fn part_1(input: Input) -> AocOutput {
-    let max_area = input
+pub fn part_1(input: Input) -> impl std::fmt::Display {
+    input
         .points
         .into_iter()
         .array_combinations()
@@ -39,9 +38,7 @@ pub fn part_1(input: Input) -> AocOutput {
             width * height
         })
         .max()
-        .unwrap_or_default();
-
-    AocOutput::from_number(max_area)
+        .unwrap_or_default()
 }
 
 #[aoc_submission(
@@ -55,7 +52,7 @@ pub fn part_1(input: Input) -> AocOutput {
 7,3",
     sample_out = 24
 )]
-pub fn part_2(input: Input) -> AocOutput {
+pub fn part_2(input: Input) -> impl std::fmt::Display {
     let points: Vec<Point> = input
         .points
         .into_iter()
@@ -76,5 +73,5 @@ pub fn part_2(input: Input) -> AocOutput {
         }
     }
 
-    AocOutput::from_number(max_area)
+    max_area
 }

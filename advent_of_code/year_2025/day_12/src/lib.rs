@@ -1,6 +1,5 @@
 use aoc_libraries::aoc_parse::{parser, prelude::*};
 use aoc_libraries::core::aoc_input::AocInput;
-use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_macros::aoc_submission;
 
 #[derive(Debug)]
@@ -82,8 +81,8 @@ impl AocInput for Input {
 12x5: 1 0 1 0 3 2",
     sample_out = 3
 )]
-pub fn part_1(input: Input) -> AocOutput {
-    let result_count = input
+pub fn part_1(input: Input) -> impl std::fmt::Display {
+    input
         .boards
         .into_iter()
         .filter(|board| {
@@ -95,7 +94,5 @@ pub fn part_1(input: Input) -> AocOutput {
                 .sum::<usize>();
             board.area > required_area
         })
-        .count();
-
-    AocOutput::from_number(result_count)
+        .count()
 }

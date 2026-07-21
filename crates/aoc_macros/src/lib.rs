@@ -7,10 +7,8 @@ use syn::{FnArg, ItemFn, parse_macro_input};
 use types::submission::SubmissionArgs;
 
 /// Part code macro.
-/// Followed by a function that accepts `input_type` and `run_sample`.
 ///
 /// To run actual tests (personalised input), set `PRIVATE` environment variable to a truthy value.
-///
 /// Defaults to running sample test ("0").
 ///
 /// # Example
@@ -61,7 +59,7 @@ pub fn aoc_submission(args: TokenStream, input: TokenStream) -> TokenStream {
         syn::LitStr::new(&format!("output_{}.txt", inner_name), inner_name.span());
 
     let expanded = quote! {
-        #[allow(dead_code)]
+        #[allow(dead_code, clippy::let_and_return)]
         #[forbid(unsafe_code)]
         #inner
 
@@ -79,22 +77,15 @@ pub fn aoc_submission(args: TokenStream, input: TokenStream) -> TokenStream {
             };
 
             let input = <#input_type as aoc_libraries::core::aoc_input::AocInput>::from_raw_string(&input);
-            let output = #inner_name(input);
+            let output = #inner_name(input).to_string();
 
-            let test_result = match should_run_actual_test {
-                true => {
-                    let output_private = format!("{}", output.answer);
-                    std::fs::write(#output_file_name, output_private).expect("Unable to write output.");
-                },
-                false => {
-                    let output_expected = AocOutput::from_number(#sample_out);
+            if should_run_actual_test {
+                std::fs::write(#output_file_name, output).expect("Unable to write output.");
+            } else {
+                let output_expected = (#sample_out).to_string();
 
-                    assert_eq!(
-                        output,
-                        output_expected
-                    );
-                }
-            };
+                assert_eq!(output, output_expected);
+            }
         }
 
     };

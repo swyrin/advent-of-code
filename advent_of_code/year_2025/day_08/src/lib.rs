@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use aoc_libraries::aoc_parse::{parser, prelude::*};
 use aoc_libraries::core::aoc_input::AocInput;
-use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_libraries::itertools::Itertools;
 use aoc_libraries::petgraph::unionfind::UnionFind;
 use aoc_macros::aoc_submission;
@@ -71,7 +70,7 @@ fn sorted_edges(points: &[Point3]) -> Vec<(isize, (usize, usize))> {
 425,690,689",
     sample_out = 40
 )]
-pub fn part_1(input: Input) -> AocOutput {
+pub fn part_1(input: Input) -> impl std::fmt::Display {
     let points = input.points;
     let edges = sorted_edges(&points);
     let connection_count = if points.len() == 20 { 10 } else { 1000 };
@@ -88,14 +87,12 @@ pub fn part_1(input: Input) -> AocOutput {
             .or_insert(0_usize) += 1;
     }
 
-    AocOutput::from_number(
-        component_sizes
-            .values()
-            .sorted_unstable()
-            .rev()
-            .take(3)
-            .product::<usize>(),
-    )
+    component_sizes
+        .values()
+        .sorted_unstable()
+        .rev()
+        .take(3)
+        .product::<usize>()
 }
 
 #[aoc_submission(
@@ -121,7 +118,7 @@ pub fn part_1(input: Input) -> AocOutput {
 425,690,689",
     sample_out = 25272
 )]
-pub fn part_2(input: Input) -> AocOutput {
+pub fn part_2(input: Input) -> impl std::fmt::Display {
     let points = input.points;
     let edges = sorted_edges(&points);
     let mut components = UnionFind::new(points.len());
@@ -133,7 +130,7 @@ pub fn part_2(input: Input) -> AocOutput {
         }
 
         if component_count == 1 {
-            return AocOutput::from_number(points[a].x * points[b].x);
+            return points[a].x * points[b].x;
         }
     }
 

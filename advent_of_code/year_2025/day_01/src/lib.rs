@@ -1,6 +1,5 @@
 use aoc_libraries::aoc_parse::{parser, prelude::*};
 use aoc_libraries::core::aoc_input::AocInput;
-use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_macros::aoc_submission;
 
 pub struct Input {
@@ -33,7 +32,7 @@ R14
 L82",
     sample_out = 3
 )]
-fn part_1(input: Input) -> AocOutput {
+fn part_1(input: Input) -> impl std::fmt::Display {
     let mut pos = 50;
     let mut count = 0;
 
@@ -55,7 +54,7 @@ fn part_1(input: Input) -> AocOutput {
         }
     }
 
-    AocOutput::from_number(count)
+    count
 }
 
 #[aoc_submission(
@@ -71,7 +70,7 @@ R14
 L82",
     sample_out = 6
 )]
-fn part_2(input: Input) -> AocOutput {
+fn part_2(input: Input) -> impl std::fmt::Display {
     let mut pos: i64 = 50;
     let mut count: i64 = 0;
 
@@ -101,5 +100,5 @@ fn part_2(input: Input) -> AocOutput {
         }
     }
 
-    AocOutput::from_number(count)
+    count
 }

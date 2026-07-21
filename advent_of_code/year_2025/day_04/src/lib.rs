@@ -1,5 +1,4 @@
 use aoc_libraries::core::aoc_input::AocInput;
-use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_libraries::pathfinding::matrix::Matrix;
 use aoc_macros::aoc_submission;
 
@@ -28,10 +27,9 @@ impl AocInput for Input {
 @.@.@@@.@.",
     sample_out = 13
 )]
-pub fn part_1(input: Input) -> AocOutput {
+pub fn part_1(input: Input) -> impl std::fmt::Display {
     let grid = input.grid;
-    let paper_rolls = grid
-        .keys()
+    grid.keys()
         .filter(|&position| {
             grid[position] == '@'
                 && grid
@@ -40,9 +38,7 @@ pub fn part_1(input: Input) -> AocOutput {
                     .count()
                     < 4
         })
-        .count();
-
-    AocOutput::from_number(paper_rolls)
+        .count()
 }
 
 #[aoc_submission(
@@ -58,7 +54,7 @@ pub fn part_1(input: Input) -> AocOutput {
 @.@.@@@.@.",
     sample_out = 43
 )]
-pub fn part_2(input: Input) -> AocOutput {
+pub fn part_2(input: Input) -> impl std::fmt::Display {
     let mut grid = input.grid;
     let mut destroy_count = 0;
 
@@ -85,5 +81,5 @@ pub fn part_2(input: Input) -> AocOutput {
         }
     }
 
-    AocOutput::from_number(destroy_count)
+    destroy_count
 }

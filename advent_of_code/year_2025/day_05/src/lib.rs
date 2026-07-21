@@ -1,6 +1,5 @@
 use aoc_libraries::aoc_parse::{parser, prelude::*};
 use aoc_libraries::core::aoc_input::AocInput;
-use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_libraries::range_set_blaze::RangeSetBlaze;
 use aoc_macros::aoc_submission;
 
@@ -34,14 +33,12 @@ impl AocInput for Input {
 32",
     sample_out = 3
 )]
-pub fn part_1(input: Input) -> AocOutput {
-    let count = input
+pub fn part_1(input: Input) -> impl std::fmt::Display {
+    input
         .numbers
         .into_iter()
         .filter(|number| input.ranges.contains(*number))
-        .count();
-
-    AocOutput::from_number(count)
+        .count()
 }
 
 #[aoc_submission(
@@ -58,6 +55,6 @@ pub fn part_1(input: Input) -> AocOutput {
 32",
     sample_out = 14
 )]
-pub fn part_2(input: Input) -> AocOutput {
-    AocOutput::from_number(input.ranges.len())
+pub fn part_2(input: Input) -> impl std::fmt::Display {
+    input.ranges.len()
 }

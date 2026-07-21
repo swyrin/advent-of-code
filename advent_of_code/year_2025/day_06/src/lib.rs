@@ -1,5 +1,4 @@
 use aoc_libraries::core::aoc_input::AocInput;
-use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_libraries::pathfinding::matrix::Matrix;
 use aoc_macros::aoc_submission;
 
@@ -19,7 +18,7 @@ impl AocInput for Input {
     sample_in = "123 328  51 64 \n 45 64  387 23 \n  6 98  215 314\n*   +   *   +  ",
     sample_out = 4277556
 )]
-pub fn part_1(input: Input) -> AocOutput {
+pub fn part_1(input: Input) -> impl std::fmt::Display {
     let content = input.content;
     let mut total = 0u128;
 
@@ -53,14 +52,14 @@ pub fn part_1(input: Input) -> AocOutput {
         total += value as u128;
     }
 
-    AocOutput::from_number(total)
+    total
 }
 
 #[aoc_submission(
     sample_in = "123 328  51 64 \n 45 64  387 23 \n  6 98  215 314\n*   +   *   +  ",
     sample_out = 3263827
 )]
-pub fn part_2(input: Input) -> AocOutput {
+pub fn part_2(input: Input) -> impl std::fmt::Display {
     let mut total = 0u128;
     let grid = Matrix::from_rows(input.content.lines().map(str::chars)).unwrap();
     let mut numbers: Vec<u32> = vec![];
@@ -101,5 +100,5 @@ pub fn part_2(input: Input) -> AocOutput {
         }
     }
 
-    AocOutput::from_number(total)
+    total
 }

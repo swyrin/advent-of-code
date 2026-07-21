@@ -3,7 +3,6 @@ use std::hash::RandomState;
 
 use aoc_libraries::aoc_parse::{parser, prelude::*};
 use aoc_libraries::core::aoc_input::AocInput;
-use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_libraries::pathfinding::prelude::count_paths;
 use aoc_libraries::petgraph::algo::all_simple_paths;
 use aoc_libraries::petgraph::graph::{DiGraph, NodeIndex};
@@ -45,7 +44,7 @@ hhh: ccc fff iii
 iii: out",
     sample_out = 5
 )]
-pub fn part_1(input: Input) -> AocOutput {
+pub fn part_1(input: Input) -> impl std::fmt::Display {
     let mut graph = DiGraph::<String, ()>::new();
     let mut node_indices: HashMap<String, NodeIndex> = HashMap::new();
 
@@ -64,9 +63,7 @@ pub fn part_1(input: Input) -> AocOutput {
 
     let you = *node_indices.get("you").unwrap();
     let out = *node_indices.get("out").unwrap();
-    let path_count = all_simple_paths::<Vec<_>, _, RandomState>(&graph, you, out, 0, None).count();
-
-    AocOutput::from_number(path_count)
+    all_simple_paths::<Vec<_>, _, RandomState>(&graph, you, out, 0, None).count()
 }
 
 #[aoc_submission(
@@ -85,14 +82,14 @@ ggg: out
 hhh: out",
     sample_out = 2
 )]
-pub fn part_2(input: Input) -> AocOutput {
+pub fn part_2(input: Input) -> impl std::fmt::Display {
     let connections: HashMap<_, _> = input
         .entries
         .into_iter()
         .map(|entry| (entry.from, entry.neighbors))
         .collect();
 
-    let path_count = count_paths(
+    count_paths(
         ("svr".to_string(), false, false),
         |(current, seen_dac, seen_fft)| {
             connections
@@ -109,7 +106,5 @@ pub fn part_2(input: Input) -> AocOutput {
                 .collect::<Vec<_>>()
         },
         |(current, seen_dac, seen_fft)| current == "out" && *seen_dac && *seen_fft,
-    );
-
-    AocOutput::from_number(path_count)
+    )
 }

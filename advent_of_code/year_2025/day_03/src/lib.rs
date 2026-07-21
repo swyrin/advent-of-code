@@ -1,5 +1,4 @@
 use aoc_libraries::core::aoc_input::AocInput;
-use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_macros::aoc_submission;
 
 pub struct Input {
@@ -20,7 +19,7 @@ impl AocInput for Input {
 818181911112111",
     sample_out = 357
 )]
-fn part_1(input: Input) -> AocOutput {
+fn part_1(input: Input) -> impl std::fmt::Display {
     let mut total: usize = 0;
 
     for line in input.lines {
@@ -64,7 +63,7 @@ fn part_1(input: Input) -> AocOutput {
         total += volt as usize;
     }
 
-    AocOutput::from_number(total)
+    total
 }
 
 #[aoc_submission(
@@ -74,7 +73,7 @@ fn part_1(input: Input) -> AocOutput {
 818181911112111",
     sample_out = 3121910778619u128
 )]
-fn part_2(input: Input) -> AocOutput {
+fn part_2(input: Input) -> impl std::fmt::Display {
     // can't believe we jumped from 2 to 12, smh.
     let mut total: i128 = 0;
 
@@ -129,5 +128,5 @@ fn part_2(input: Input) -> AocOutput {
         total += number;
     }
 
-    AocOutput::from_number(total)
+    total
 }

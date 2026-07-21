@@ -1,6 +1,5 @@
 use aoc_libraries::aoc_parse::{parser, prelude::*};
 use aoc_libraries::core::aoc_input::AocInput;
-use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_libraries::good_lp::{
     Expression, IntoAffineExpression, Solution, SolverModel, Variable, microlp, variable, variables,
 };
@@ -43,7 +42,7 @@ impl AocInput for Input {
 [.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) {10,11,11,5,10,5}",
     sample_out = 7
 )]
-pub fn part_1(input: Input) -> AocOutput {
+pub fn part_1(input: Input) -> impl std::fmt::Display {
     let total = input
         .machines
         .into_iter()
@@ -72,7 +71,7 @@ pub fn part_1(input: Input) -> AocOutput {
         })
         .sum::<usize>();
 
-    AocOutput::from_number(total)
+    total
 }
 
 #[aoc_submission(
@@ -81,7 +80,7 @@ pub fn part_1(input: Input) -> AocOutput {
 [.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) {10,11,11,5,10,5}",
     sample_out = 33
 )]
-pub fn part_2(input: Input) -> AocOutput {
+pub fn part_2(input: Input) -> impl std::fmt::Display {
     let mut total = 0_u128;
 
     for machine in input.machines {
@@ -111,5 +110,5 @@ pub fn part_2(input: Input) -> AocOutput {
         total += press_count.round() as u128;
     }
 
-    AocOutput::from_number(total)
+    total
 }

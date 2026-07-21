@@ -6,8 +6,8 @@ pub struct SubmissionArgs {
     /// Usually double-clicking on the sample input box should work.
     pub sample_in: syn::LitStr,
 
-    /// The highlighted number, near the end of the statement.
-    pub sample_out: syn::LitInt,
+    /// The expected sample answer, as any expression implementing `ToString`.
+    pub sample_out: syn::Expr,
 }
 
 impl Parse for SubmissionArgs {
@@ -30,7 +30,7 @@ impl Parse for SubmissionArgs {
                     if sample_out.is_some() {
                         return Err(input.error("`sample_out` specified more than once"));
                     }
-                    sample_out = Some(input.parse::<syn::LitInt>()?);
+                    sample_out = Some(input.parse::<syn::Expr>()?);
                 }
                 other => {
                     return Err(input.error(format!(

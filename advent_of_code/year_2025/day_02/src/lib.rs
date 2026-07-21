@@ -1,6 +1,5 @@
 use aoc_libraries::aoc_parse::{parser, prelude::*};
 use aoc_libraries::core::aoc_input::AocInput;
-use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_macros::aoc_submission;
 
 pub struct Input {
@@ -21,7 +20,7 @@ impl AocInput for Input {
     sample_in = r"11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,2121212118-2121212124",
     sample_out = 1227775554
 )]
-fn part_1(input: Input) -> AocOutput {
+fn part_1(input: Input) -> impl std::fmt::Display {
     let mut result = 0;
 
     for (head, tail) in input.ranges {
@@ -42,14 +41,14 @@ fn part_1(input: Input) -> AocOutput {
         }
     }
 
-    AocOutput::from_number(result)
+    result
 }
 
 #[aoc_submission(
     sample_in = r"11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,2121212118-2121212124",
     sample_out = 4174379265u128
 )]
-fn part_2(input: Input) -> AocOutput {
+fn part_2(input: Input) -> impl std::fmt::Display {
     let mut result = 0;
 
     for (head, tail) in input.ranges {
@@ -83,5 +82,5 @@ fn part_2(input: Input) -> AocOutput {
         }
     }
 
-    AocOutput::from_number(result)
+    result
 }
