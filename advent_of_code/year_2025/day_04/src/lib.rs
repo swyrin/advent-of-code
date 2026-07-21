@@ -1,13 +1,13 @@
+use aoc_libraries::core::aoc_input::AocInput;
+use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_libraries::pathfinding::matrix::Matrix;
 use aoc_macros::aoc_submission;
-use aoc_utils::traits::generalised_output::UmiAteTheOutput;
-use aoc_utils::traits::parsable_input::ParsableInput;
 
 pub struct Input {
     pub grid: Matrix<char>,
 }
 
-impl ParsableInput for Input {
+impl AocInput for Input {
     fn from_raw_string(content: &str) -> Self {
         let grid = Matrix::from_rows(content.lines().map(str::chars)).unwrap();
 
@@ -29,7 +29,7 @@ impl ParsableInput for Input {
 @.@.@@@.@.",
     sample_out = 13
 )]
-pub fn part_1(input: Input) -> UmiAteTheOutput {
+pub fn part_1(input: Input) -> AocOutput {
     let grid = input.grid;
     let paper_rolls = grid
         .keys()
@@ -43,7 +43,7 @@ pub fn part_1(input: Input) -> UmiAteTheOutput {
         })
         .count();
 
-    UmiAteTheOutput::from_number(paper_rolls)
+    AocOutput::from_number(paper_rolls)
 }
 
 #[aoc_submission(
@@ -60,7 +60,7 @@ pub fn part_1(input: Input) -> UmiAteTheOutput {
 @.@.@@@.@.",
     sample_out = 43
 )]
-pub fn part_2(input: Input) -> UmiAteTheOutput {
+pub fn part_2(input: Input) -> AocOutput {
     let mut grid = input.grid;
     let mut destroy_count = 0;
 
@@ -87,5 +87,5 @@ pub fn part_2(input: Input) -> UmiAteTheOutput {
         }
     }
 
-    UmiAteTheOutput::from_number(destroy_count)
+    AocOutput::from_number(destroy_count)
 }

@@ -1,7 +1,7 @@
 use aoc_libraries::aoc_parse::{parser, prelude::*};
+use aoc_libraries::core::aoc_input::AocInput;
+use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_macros::aoc_submission;
-use aoc_utils::traits::generalised_output::UmiAteTheOutput;
-use aoc_utils::traits::parsable_input::ParsableInput;
 
 #[derive(Debug)]
 pub struct Board {
@@ -14,7 +14,7 @@ pub struct Input {
     pub boards: Vec<Board>,
 }
 
-impl ParsableInput for Input {
+impl AocInput for Input {
     fn from_raw_string(content: &str) -> Self {
         let piece_parser = parser!(sections(
             line(usize ":")
@@ -83,7 +83,7 @@ impl ParsableInput for Input {
 12x5: 1 0 1 0 3 2",
     sample_out = 3
 )]
-pub fn part_1(input: Input) -> UmiAteTheOutput {
+pub fn part_1(input: Input) -> AocOutput {
     let result_count = input
         .boards
         .into_iter()
@@ -98,5 +98,5 @@ pub fn part_1(input: Input) -> UmiAteTheOutput {
         })
         .count();
 
-    UmiAteTheOutput::from_number(result_count)
+    AocOutput::from_number(result_count)
 }

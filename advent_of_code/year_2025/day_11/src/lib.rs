@@ -2,12 +2,12 @@ use std::collections::HashMap;
 use std::hash::RandomState;
 
 use aoc_libraries::aoc_parse::{parser, prelude::*};
+use aoc_libraries::core::aoc_input::AocInput;
+use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_libraries::pathfinding::prelude::count_paths;
 use aoc_libraries::petgraph::algo::all_simple_paths;
 use aoc_libraries::petgraph::graph::{DiGraph, NodeIndex};
 use aoc_macros::aoc_submission;
-use aoc_utils::traits::generalised_output::UmiAteTheOutput;
-use aoc_utils::traits::parsable_input::ParsableInput;
 
 #[derive(Debug)]
 pub struct Adjacent {
@@ -19,7 +19,7 @@ pub struct Input {
     pub entries: Vec<Adjacent>,
 }
 
-impl ParsableInput for Input {
+impl AocInput for Input {
     fn from_raw_string(content: &str) -> Self {
         let entries = parser!(lines(
             from:string(alnum+) ": " neighbors:repeat_sep(string(alnum+), " ")
@@ -46,7 +46,7 @@ hhh: ccc fff iii
 iii: out",
     sample_out = 5
 )]
-pub fn part_1(input: Input) -> UmiAteTheOutput {
+pub fn part_1(input: Input) -> AocOutput {
     let mut graph = DiGraph::<String, ()>::new();
     let mut node_indices: HashMap<String, NodeIndex> = HashMap::new();
 
@@ -67,7 +67,7 @@ pub fn part_1(input: Input) -> UmiAteTheOutput {
     let out = *node_indices.get("out").unwrap();
     let path_count = all_simple_paths::<Vec<_>, _, RandomState>(&graph, you, out, 0, None).count();
 
-    UmiAteTheOutput::from_number(path_count)
+    AocOutput::from_number(path_count)
 }
 
 #[aoc_submission(
@@ -87,7 +87,7 @@ ggg: out
 hhh: out",
     sample_out = 2
 )]
-pub fn part_2(input: Input) -> UmiAteTheOutput {
+pub fn part_2(input: Input) -> AocOutput {
     let connections: HashMap<_, _> = input
         .entries
         .into_iter()
@@ -113,5 +113,5 @@ pub fn part_2(input: Input) -> UmiAteTheOutput {
         |(current, seen_dac, seen_fft)| current == "out" && *seen_dac && *seen_fft,
     );
 
-    UmiAteTheOutput::from_number(path_count)
+    AocOutput::from_number(path_count)
 }

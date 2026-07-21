@@ -1,8 +1,8 @@
 [package]
-name = "day_03"
+name = "year_2025_day_03"
 edition.workspace = true
 version.workspace = true
 
 [dependencies]
 aoc_macros.workspace = true
-aoc_utils.workspace = true
+aoc_libraries.workspace = true

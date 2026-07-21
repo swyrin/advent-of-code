@@ -1,14 +1,14 @@
 use std::collections::{HashMap, HashSet};
 
+use aoc_libraries::core::aoc_input::AocInput;
+use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_macros::aoc_submission;
-use aoc_utils::traits::generalised_output::UmiAteTheOutput;
-use aoc_utils::traits::parsable_input::ParsableInput;
 
 pub struct Input {
     pub content: String,
 }
 
-impl ParsableInput for Input {
+impl AocInput for Input {
     fn from_raw_string(content: &str) -> Self {
         Self {
             content: content.to_string(),
@@ -36,7 +36,7 @@ impl ParsableInput for Input {
 ...............",
     sample_out = 21
 )]
-pub fn part_1(input: Input) -> UmiAteTheOutput {
+pub fn part_1(input: Input) -> AocOutput {
     let mut required_columns = HashSet::new();
     let lines = input.content.lines();
 
@@ -71,7 +71,7 @@ pub fn part_1(input: Input) -> UmiAteTheOutput {
         required_columns.extend(next_required_columns);
     }
 
-    UmiAteTheOutput::from_number(total)
+    AocOutput::from_number(total)
 }
 
 #[aoc_submission(
@@ -94,7 +94,7 @@ pub fn part_1(input: Input) -> UmiAteTheOutput {
 ...............",
     sample_out = 40
 )]
-pub fn part_2(input: Input) -> UmiAteTheOutput {
+pub fn part_2(input: Input) -> AocOutput {
     // how many rays reach x
     let mut rays: HashMap<usize, u128> = HashMap::new();
     let lines = input.content.lines();
@@ -125,5 +125,5 @@ pub fn part_2(input: Input) -> UmiAteTheOutput {
         rays = next_rays;
     }
 
-    UmiAteTheOutput::from_number(rays.values().copied().sum::<u128>())
+    AocOutput::from_number(rays.values().copied().sum::<u128>())
 }

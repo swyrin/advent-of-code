@@ -1,12 +1,12 @@
+use aoc_libraries::core::aoc_input::AocInput;
+use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_macros::aoc_submission;
-use aoc_utils::traits::generalised_output::UmiAteTheOutput;
-use aoc_utils::traits::parsable_input::ParsableInput;
 
 pub struct Input {
     pub lines: Vec<String>,
 }
 
-impl ParsableInput for Input {
+impl AocInput for Input {
     fn from_raw_string(content: &str) -> Self {
         let lines = content.lines().map(|s| s.to_string()).collect();
         Self { lines }
@@ -21,7 +21,7 @@ impl ParsableInput for Input {
 818181911112111",
     sample_out = 357
 )]
-fn part_1(input: Input) -> UmiAteTheOutput {
+fn part_1(input: Input) -> AocOutput {
     let mut total: usize = 0;
 
     for line in input.lines {
@@ -65,7 +65,7 @@ fn part_1(input: Input) -> UmiAteTheOutput {
         total += volt as usize;
     }
 
-    UmiAteTheOutput::from_number(total)
+    AocOutput::from_number(total)
 }
 
 #[aoc_submission(
@@ -76,7 +76,7 @@ fn part_1(input: Input) -> UmiAteTheOutput {
 818181911112111",
     sample_out = 3121910778619u128
 )]
-fn part_2(input: Input) -> UmiAteTheOutput {
+fn part_2(input: Input) -> AocOutput {
     // can't believe we jumped from 2 to 12, smh.
     let mut total: i128 = 0;
 
@@ -131,5 +131,5 @@ fn part_2(input: Input) -> UmiAteTheOutput {
         total += number;
     }
 
-    UmiAteTheOutput::from_number(total)
+    AocOutput::from_number(total)
 }

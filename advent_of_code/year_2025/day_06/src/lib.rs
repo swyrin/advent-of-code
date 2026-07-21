@@ -1,13 +1,13 @@
+use aoc_libraries::core::aoc_input::AocInput;
+use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_libraries::pathfinding::matrix::Matrix;
 use aoc_macros::aoc_submission;
-use aoc_utils::traits::generalised_output::UmiAteTheOutput;
-use aoc_utils::traits::parsable_input::ParsableInput;
 
 pub struct Input {
     pub content: String,
 }
 
-impl ParsableInput for Input {
+impl AocInput for Input {
     fn from_raw_string(content: &str) -> Self {
         Self {
             content: content.to_string(),
@@ -20,7 +20,7 @@ impl ParsableInput for Input {
     sample_in = "123 328  51 64 \n 45 64  387 23 \n  6 98  215 314\n*   +   *   +  ",
     sample_out = 4277556
 )]
-pub fn part_1(input: Input) -> UmiAteTheOutput {
+pub fn part_1(input: Input) -> AocOutput {
     let content = input.content;
     let mut total = 0u128;
 
@@ -54,7 +54,7 @@ pub fn part_1(input: Input) -> UmiAteTheOutput {
         total += value as u128;
     }
 
-    UmiAteTheOutput::from_number(total)
+    AocOutput::from_number(total)
 }
 
 #[aoc_submission(
@@ -62,7 +62,7 @@ pub fn part_1(input: Input) -> UmiAteTheOutput {
     sample_in = "123 328  51 64 \n 45 64  387 23 \n  6 98  215 314\n*   +   *   +  ",
     sample_out = 3263827
 )]
-pub fn part_2(input: Input) -> UmiAteTheOutput {
+pub fn part_2(input: Input) -> AocOutput {
     let mut total = 0u128;
     let grid = Matrix::from_rows(input.content.lines().map(str::chars)).unwrap();
     let mut numbers: Vec<u32> = vec![];
@@ -103,5 +103,5 @@ pub fn part_2(input: Input) -> UmiAteTheOutput {
         }
     }
 
-    UmiAteTheOutput::from_number(total)
+    AocOutput::from_number(total)
 }

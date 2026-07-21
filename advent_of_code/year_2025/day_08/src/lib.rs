@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
 use aoc_libraries::aoc_parse::{parser, prelude::*};
+use aoc_libraries::core::aoc_input::AocInput;
+use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_libraries::itertools::Itertools;
 use aoc_libraries::petgraph::unionfind::UnionFind;
 use aoc_macros::aoc_submission;
-use aoc_utils::traits::generalised_output::UmiAteTheOutput;
-use aoc_utils::traits::parsable_input::ParsableInput;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub struct Point3 {
@@ -26,7 +26,7 @@ pub struct Input {
     pub points: Vec<Point3>,
 }
 
-impl ParsableInput for Input {
+impl AocInput for Input {
     fn from_raw_string(content: &str) -> Self {
         let points = parser!(lines(
             x:isize "," y:isize "," z:isize => Point3 { x, y, z }
@@ -72,7 +72,7 @@ fn sorted_edges(points: &[Point3]) -> Vec<(isize, (usize, usize))> {
 425,690,689",
     sample_out = 40
 )]
-pub fn part_1(input: Input) -> UmiAteTheOutput {
+pub fn part_1(input: Input) -> AocOutput {
     let points = input.points;
     let edges = sorted_edges(&points);
     let connection_count = if points.len() == 20 { 10 } else { 1000 };
@@ -89,7 +89,7 @@ pub fn part_1(input: Input) -> UmiAteTheOutput {
             .or_insert(0_usize) += 1;
     }
 
-    UmiAteTheOutput::from_number(
+    AocOutput::from_number(
         component_sizes
             .values()
             .sorted_unstable()
@@ -123,7 +123,7 @@ pub fn part_1(input: Input) -> UmiAteTheOutput {
 425,690,689",
     sample_out = 25272
 )]
-pub fn part_2(input: Input) -> UmiAteTheOutput {
+pub fn part_2(input: Input) -> AocOutput {
     let points = input.points;
     let edges = sorted_edges(&points);
     let mut components = UnionFind::new(points.len());
@@ -135,7 +135,7 @@ pub fn part_2(input: Input) -> UmiAteTheOutput {
         }
 
         if component_count == 1 {
-            return UmiAteTheOutput::from_number(points[a].x * points[b].x);
+            return AocOutput::from_number(points[a].x * points[b].x);
         }
     }
 

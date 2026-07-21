@@ -1,15 +1,15 @@
 use aoc_libraries::aoc_parse::{parser, prelude::*};
+use aoc_libraries::core::aoc_input::AocInput;
+use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_libraries::range_set_blaze::RangeSetBlaze;
 use aoc_macros::aoc_submission;
-use aoc_utils::traits::generalised_output::UmiAteTheOutput;
-use aoc_utils::traits::parsable_input::ParsableInput;
 
 pub struct Input {
     pub ranges: RangeSetBlaze<i64>,
     pub numbers: Vec<i64>,
 }
 
-impl ParsableInput for Input {
+impl AocInput for Input {
     fn from_raw_string(content: &str) -> Self {
         let (ranges, numbers) = parser!(section(lines(i64 "-" i64)) section(lines(i64)))
             .parse(content)
@@ -35,14 +35,14 @@ impl ParsableInput for Input {
 32",
     sample_out = 3
 )]
-pub fn part_1(input: Input) -> UmiAteTheOutput {
+pub fn part_1(input: Input) -> AocOutput {
     let count = input
         .numbers
         .into_iter()
         .filter(|number| input.ranges.contains(*number))
         .count();
 
-    UmiAteTheOutput::from_number(count)
+    AocOutput::from_number(count)
 }
 
 #[aoc_submission(
@@ -60,6 +60,6 @@ pub fn part_1(input: Input) -> UmiAteTheOutput {
 32",
     sample_out = 14
 )]
-pub fn part_2(input: Input) -> UmiAteTheOutput {
-    UmiAteTheOutput::from_number(input.ranges.len())
+pub fn part_2(input: Input) -> AocOutput {
+    AocOutput::from_number(input.ranges.len())
 }

@@ -1,13 +1,13 @@
 use aoc_libraries::aoc_parse::{parser, prelude::*};
+use aoc_libraries::core::aoc_input::AocInput;
+use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_macros::aoc_submission;
-use aoc_utils::traits::generalised_output::UmiAteTheOutput;
-use aoc_utils::traits::parsable_input::ParsableInput;
 
 pub struct Input {
     pub moves: Vec<(char, i32)>,
 }
 
-impl ParsableInput for Input {
+impl AocInput for Input {
     fn from_raw_string(content: &str) -> Self {
         let moves = parser!(lines({
             "L" amount:i32 => ('L', amount),
@@ -34,7 +34,7 @@ R14
 L82",
     sample_out = 3
 )]
-fn part_1(input: Input) -> UmiAteTheOutput {
+fn part_1(input: Input) -> AocOutput {
     let mut pos = 50;
     let mut count = 0;
 
@@ -56,7 +56,7 @@ fn part_1(input: Input) -> UmiAteTheOutput {
         }
     }
 
-    UmiAteTheOutput::from_number(count)
+    AocOutput::from_number(count)
 }
 
 #[aoc_submission(
@@ -73,7 +73,7 @@ R14
 L82",
     sample_out = 6
 )]
-fn part_2(input: Input) -> UmiAteTheOutput {
+fn part_2(input: Input) -> AocOutput {
     let mut pos: i64 = 50;
     let mut count: i64 = 0;
 
@@ -103,5 +103,5 @@ fn part_2(input: Input) -> UmiAteTheOutput {
         }
     }
 
-    UmiAteTheOutput::from_number(count)
+    AocOutput::from_number(count)
 }

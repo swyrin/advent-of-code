@@ -1,15 +1,15 @@
 use aoc_libraries::aoc_parse::{parser, prelude::*};
+use aoc_libraries::core::aoc_input::AocInput;
+use aoc_libraries::core::aoc_output::AocOutput;
 use aoc_libraries::geo::{Contains, LineString, Point, Polygon, Rect, point};
 use aoc_libraries::itertools::Itertools;
 use aoc_macros::aoc_submission;
-use aoc_utils::traits::generalised_output::UmiAteTheOutput;
-use aoc_utils::traits::parsable_input::ParsableInput;
 
 pub struct Input {
     pub points: Vec<(i128, i128)>,
 }
 
-impl ParsableInput for Input {
+impl AocInput for Input {
     fn from_raw_string(content: &str) -> Self {
         let points = parser!(lines(i128 "," i128)).parse(content).unwrap();
 
@@ -29,7 +29,7 @@ impl ParsableInput for Input {
 7,3",
     sample_out = 50
 )]
-pub fn part_1(input: Input) -> UmiAteTheOutput {
+pub fn part_1(input: Input) -> AocOutput {
     let max_area = input
         .points
         .into_iter()
@@ -42,7 +42,7 @@ pub fn part_1(input: Input) -> UmiAteTheOutput {
         .max()
         .unwrap_or_default();
 
-    UmiAteTheOutput::from_number(max_area)
+    AocOutput::from_number(max_area)
 }
 
 #[aoc_submission(
@@ -57,7 +57,7 @@ pub fn part_1(input: Input) -> UmiAteTheOutput {
 7,3",
     sample_out = 24
 )]
-pub fn part_2(input: Input) -> UmiAteTheOutput {
+pub fn part_2(input: Input) -> AocOutput {
     let points: Vec<Point> = input
         .points
         .into_iter()
@@ -78,5 +78,5 @@ pub fn part_2(input: Input) -> UmiAteTheOutput {
         }
     }
 
-    UmiAteTheOutput::from_number(max_area)
+    AocOutput::from_number(max_area)
 }
