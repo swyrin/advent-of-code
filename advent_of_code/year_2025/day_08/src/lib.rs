@@ -49,7 +49,6 @@ fn sorted_edges(points: &[Point3]) -> Vec<(isize, (usize, usize))> {
 }
 
 #[aoc_submission(
-    input_type = crate::Input,
     sample_in = r"162,817,812
 57,618,57
 906,360,560
@@ -100,7 +99,6 @@ pub fn part_1(input: Input) -> AocOutput {
 }
 
 #[aoc_submission(
-    input_type = crate::Input,
     sample_in = r"162,817,812
 57,618,57
 906,360,560

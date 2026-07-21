@@ -47,7 +47,6 @@ impl AocInput for Input {
 
 /// Eric put a troll problem.
 #[aoc_submission(
-    input_type = crate::Input,
     sample_in = r"0:
 ###
 ##.

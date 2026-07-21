@@ -33,7 +33,6 @@ impl AocInput for Input {
 }
 
 #[aoc_submission(
-    input_type = crate::Input,
     sample_in = r"aaa: you hhh
 you: bbb ccc
 bbb: ddd eee
@@ -71,7 +70,6 @@ pub fn part_1(input: Input) -> AocOutput {
 }
 
 #[aoc_submission(
-    input_type = crate::Input,
     sample_in = r"svr: aaa bbb
 aaa: fft
 fft: ccc

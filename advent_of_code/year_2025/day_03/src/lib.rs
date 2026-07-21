@@ -14,7 +14,6 @@ impl AocInput for Input {
 }
 
 #[aoc_submission(
-    input_type = crate::Input,
     sample_in = r"987654321111111
 811111111111119
 234234234234278
@@ -69,7 +68,6 @@ fn part_1(input: Input) -> AocOutput {
 }
 
 #[aoc_submission(
-    input_type = crate::Input,
     sample_in = r"987654321111111
 811111111111119
 234234234234278

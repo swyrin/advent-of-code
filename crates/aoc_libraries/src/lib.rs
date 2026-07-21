@@ -4,6 +4,7 @@ pub mod core;
 pub mod utils;
 
 pub use aoc_parse;
+pub use counter;
 pub use geo;
 pub use good_lp;
 pub use itertools;

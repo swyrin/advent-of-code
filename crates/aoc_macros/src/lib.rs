@@ -2,7 +2,7 @@ mod types;
 
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{ItemFn, parse_macro_input};
+use syn::{FnArg, ItemFn, parse_macro_input};
 
 use types::submission::SubmissionArgs;
 
@@ -29,11 +29,10 @@ use types::submission::SubmissionArgs;
 /// }
 ///
 /// #[aoc_submission(
-///     input_type = crate::Ligma,
 ///     sample_in = "42",
 ///     sample_out = 2,
 /// )]
-/// fn test(input: Ligma, is_test: bool) -> isize {
+/// fn test(input: Ligma) -> isize {
 ///     2
 /// }
 /// ```
@@ -43,12 +42,21 @@ pub fn aoc_submission(args: TokenStream, input: TokenStream) -> TokenStream {
     let inner = parse_macro_input!(input as ItemFn);
 
     let inner_name = &inner.sig.ident;
-    let input_type = &args.input_type;
+    let input_type = match inner.sig.inputs.first() {
+        Some(FnArg::Typed(argument)) => argument.ty.as_ref(),
+        _ => {
+            return syn::Error::new_spanned(
+                &inner.sig,
+                "`aoc_submission` requires an input argument",
+            )
+            .to_compile_error()
+            .into();
+        }
+    };
     let sample_in = &args.sample_in;
     let sample_out = &args.sample_out;
 
     let test_name = syn::Ident::new(&format!("test_method_{}", inner_name), inner_name.span());
-    let mod_name = syn::Ident::new(&format!("test_module_{}", inner_name), inner_name.span());
     let output_file_name =
         syn::LitStr::new(&format!("output_{}.txt", inner_name), inner_name.span());
 
@@ -58,43 +66,37 @@ pub fn aoc_submission(args: TokenStream, input: TokenStream) -> TokenStream {
         #inner
 
         #[cfg(test)]
-        mod #mod_name {
-            use std::fs;
-            use aoc_libraries::utils::test_environment;
-            use aoc_libraries::core::aoc_input::AocInput;
-            use aoc_libraries::core::aoc_output::AocOutput;
+        #[test]
+        fn #test_name()
+        where
+            #input_type : aoc_libraries::core::aoc_input::AocInput,
+        {
+            let should_run_actual_test = aoc_libraries::utils::test_environment::should_run_with_personalised_input();
 
-            #[test]
-            fn #test_name()
-            where
-                #input_type : AocInput,
-            {
-                let should_run_actual_test = test_environment::should_run_with_personalised_input();
+            let input = match should_run_actual_test {
+                true => std::fs::read_to_string("input.txt").expect("Unable to read private input"),
+                false => String::from(#sample_in)
+            };
 
-                let input = match should_run_actual_test {
-                    true => fs::read_to_string("input.txt").expect("Unable to read private input"),
-                    false => String::from(#sample_in)
-                };
+            let input = <#input_type as aoc_libraries::core::aoc_input::AocInput>::from_raw_string(&input);
+            let output = #inner_name(input);
 
-                let input = #input_type::from_raw_string(&input);
-                let output = crate::#inner_name(input);
+            let test_result = match should_run_actual_test {
+                true => {
+                    let output_private = format!("{}", output.answer);
+                    std::fs::write(#output_file_name, output_private).expect("Unable to write output.");
+                },
+                false => {
+                    let output_expected = AocOutput::from_number(#sample_out);
 
-                let test_result = match should_run_actual_test {
-                    true => {
-                        let output_private = format!("{}", output.answer);
-                        fs::write(#output_file_name, output_private).expect("Unable to write output.");
-                    },
-                    false => {
-                        let output_expected = AocOutput::from_number(#sample_out);
-
-                        assert_eq!(
-                            output,
-                            output_expected
-                        );
-                    }
-                };
-            }
+                    assert_eq!(
+                        output,
+                        output_expected
+                    );
+                }
+            };
         }
+
     };
 
     expanded.into()

@@ -21,7 +21,6 @@ impl AocInput for Input {
 }
 
 #[aoc_submission(
-    input_type = crate::Input,
     sample_in = r"L68
 L30
 R48
@@ -60,7 +59,6 @@ fn part_1(input: Input) -> AocOutput {
 }
 
 #[aoc_submission(
-    input_type = crate::Input,
     sample_in = r"L68
 L30
 R48
