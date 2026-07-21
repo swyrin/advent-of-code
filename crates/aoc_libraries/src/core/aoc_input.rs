@@ -1,5 +1,5 @@
 /// Read: input with type safety.
-pub trait ParsableInput {
+pub trait AocInput {
     /// Read input from a raw `&str`.
     ///
     /// Usually, you should be using the `aoc_macro::aoc_submission`
