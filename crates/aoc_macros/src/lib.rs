@@ -34,6 +34,11 @@ use types::submission::SubmissionArgs;
 /// fn test(input: Ligma) -> isize {
 ///     2
 /// }
+///
+/// #[aoc_submission(ignore = "Requires manual inspection")]
+/// fn visual_part(input: Ligma) -> isize {
+///     input.x
+/// }
 /// ```
 #[proc_macro_attribute]
 pub fn aoc_submission(args: TokenStream, input: TokenStream) -> TokenStream {
@@ -52,46 +57,57 @@ pub fn aoc_submission(args: TokenStream, input: TokenStream) -> TokenStream {
             .into();
         }
     };
-    let sample_in = &args.sample_in;
-    let sample_out = &args.sample_out;
-
     let test_name = syn::Ident::new(&format!("test_method_{}", inner_name), inner_name.span());
     let output_file_name =
         syn::LitStr::new(&format!("output_{}.txt", inner_name), inner_name.span());
+
+    let generated_test = match args {
+        SubmissionArgs::Sample {
+            sample_in,
+            sample_out,
+        } => quote! {
+            #[cfg(test)]
+            #[test]
+            fn #test_name()
+            where
+                #input_type: std::str::FromStr,
+                <#input_type as std::str::FromStr>::Err: std::fmt::Display,
+            {
+                let should_run_actual_test = aoc_libraries::utils::test_environment::should_run_with_personalised_input();
+
+                let raw_input = match should_run_actual_test {
+                    true => std::fs::read_to_string("input.txt").expect("Unable to read private input"),
+                    false => String::from(#sample_in)
+                };
+
+                let input = raw_input.parse::<#input_type>().unwrap_or_else(|error| {
+                    panic!("Unable to parse input: {error}")
+                });
+                let output = #inner_name(input).to_string();
+
+                if should_run_actual_test {
+                    std::fs::write(#output_file_name, output).expect("Unable to write output.");
+                } else {
+                    let output_expected = (#sample_out).to_string();
+
+                    assert_eq!(output, output_expected);
+                }
+            }
+        },
+        SubmissionArgs::Ignored { reason } => quote! {
+            #[cfg(test)]
+            #[test]
+            #[ignore = #reason]
+            fn #test_name() {}
+        },
+    };
 
     let expanded = quote! {
         #[allow(dead_code, clippy::let_and_return)]
         #[forbid(unsafe_code)]
         #inner
 
-        #[cfg(test)]
-        #[test]
-        fn #test_name()
-        where
-            #input_type: std::str::FromStr,
-            <#input_type as std::str::FromStr>::Err: std::fmt::Display,
-        {
-            let should_run_actual_test = aoc_libraries::utils::test_environment::should_run_with_personalised_input();
-
-            let raw_input = match should_run_actual_test {
-                true => std::fs::read_to_string("input.txt").expect("Unable to read private input"),
-                false => String::from(#sample_in)
-            };
-
-            let input = raw_input.parse::<#input_type>().unwrap_or_else(|error| {
-                panic!("Unable to parse input: {error}")
-            });
-            let output = #inner_name(input).to_string();
-
-            if should_run_actual_test {
-                std::fs::write(#output_file_name, output).expect("Unable to write output.");
-            } else {
-                let output_expected = (#sample_out).to_string();
-
-                assert_eq!(output, output_expected);
-            }
-        }
-
+        #generated_test
     };
 
     expanded.into()

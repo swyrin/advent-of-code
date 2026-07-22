@@ -97,3 +97,8 @@ pub fn part_1(input: Input) -> impl std::fmt::Display {
         })
         .count()
 }
+
+#[aoc_submission(ignore = "Ho ho ho!")]
+pub fn part_2(_: Input) -> impl std::fmt::Display {
+   42
+}

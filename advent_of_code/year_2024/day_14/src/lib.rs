@@ -85,7 +85,7 @@ pub fn part_1(input: Input) -> impl std::fmt::Display {
     quadrants.into_iter().product::<u64>()
 }
 
-#[aoc_submission(sample_in = "", sample_out = "This is a joke.")]
+#[aoc_submission(ignore = "Uhh.. you want to eyeball these images?")]
 pub fn part_2(input: Input) -> impl std::fmt::Display {
     let seconds = 7000;
 
