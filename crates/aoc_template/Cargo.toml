@@ -1,0 +1,8 @@
+[package]
+name = "year_template_day_template"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+aoc_libraries.workspace = true
+aoc_macros.workspace = true

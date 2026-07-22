@@ -1,17 +1,29 @@
+[package]
+name = "advent-of-code"
+version.workspace = true
+edition.workspace = true
+authors = [
+    "Tien Dat Pham <hi@swyrin.me>"
+]
+
 [workspace]
 members = ["crates/*", "advent_of_code/year_2025/*", "advent_of_code/year_2024/*"]
 resolver = "3"
 
 [workspace.package]
+version = "0.1.0"
+edition = "2024"
 publish = false
 license-file = "LICENSE.md"
 description = "Random BS go stuffs for Advent of Code."
 homepage = "https://github.com/swyrin/advent-of-code"
 repository = "https://github.com/swyrin/advent-of-code"
-readme = "README.md"
-edition = "2024"
-version = "0.1.0"
 
 [workspace.dependencies]
 aoc_libraries = { path = "crates/aoc_libraries" }
 aoc_macros = { path = "crates/aoc_macros" }
+aoc_cli = { path = "crates/aoc_cli" }
+
+[dependencies]
+clap = { version = "4.6.4", features = ["derive"] }
+chrono = "0.4.45"
