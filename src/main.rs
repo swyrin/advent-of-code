@@ -70,4 +70,18 @@ mod test {
         fs::remove_dir_all(parent).unwrap();
         assert!(!path.exists());
     }
+
+    #[test]
+    fn test_override_before_creation_is_on() {
+        let opts = GenerateOptions {
+            year: 2,
+            day: 1,
+            overwrite: true,
+        };
+
+        let path = get_submission_path(PathBuf::from_str(&get_cwd()).unwrap(), opts.year, opts.day);
+
+        assert!(!path.exists());
+        assert!(is_able_to_setup_submission(path.clone(), opts.overwrite));
+    }
 }
