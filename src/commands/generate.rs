@@ -9,7 +9,10 @@ use chrono::prelude::*;
 use clap::Args;
 use std::process::Command;
 
-use crate::utils;
+use crate::utils::{
+    self,
+    number::{pad_day_number, pad_year_number},
+};
 
 #[derive(Args)]
 pub struct GenerateOptions {
@@ -40,8 +43,8 @@ impl Default for GenerateOptions {
 pub fn get_submission_path(root: PathBuf, year: usize, day: usize) -> PathBuf {
     Path::new(&root)
         .join("advent_of_code")
-        .join(format!("year_{}", year))
-        .join(format!("day_{}", day))
+        .join(format!("year_{}", pad_year_number(year)))
+        .join(format!("day_{}", pad_day_number(day)))
 }
 
 /// Get template files path.
