@@ -7,7 +7,35 @@ authors = [
 ]
 
 [workspace]
-members = ["crates/*", "advent_of_code/year_2025/*", "advent_of_code/year_2024/*"]
+members = [
+    "crates/*",
+    "advent_of_code/year_2024/day_01",
+    "advent_of_code/year_2024/day_02",
+    "advent_of_code/year_2024/day_03",
+    "advent_of_code/year_2024/day_04",
+    "advent_of_code/year_2024/day_05",
+    "advent_of_code/year_2024/day_06",
+    "advent_of_code/year_2024/day_07",
+    "advent_of_code/year_2024/day_08",
+    "advent_of_code/year_2024/day_09",
+    "advent_of_code/year_2024/day_10",
+    "advent_of_code/year_2024/day_11",
+    "advent_of_code/year_2024/day_12",
+    "advent_of_code/year_2024/day_13",
+    "advent_of_code/year_2024/day_14",
+    "advent_of_code/year_2025/day_01",
+    "advent_of_code/year_2025/day_02",
+    "advent_of_code/year_2025/day_03",
+    "advent_of_code/year_2025/day_04",
+    "advent_of_code/year_2025/day_05",
+    "advent_of_code/year_2025/day_06",
+    "advent_of_code/year_2025/day_07",
+    "advent_of_code/year_2025/day_08",
+    "advent_of_code/year_2025/day_09",
+    "advent_of_code/year_2025/day_10",
+    "advent_of_code/year_2025/day_11",
+    "advent_of_code/year_2025/day_12"
+]
 resolver = "3"
 
 [workspace.package]

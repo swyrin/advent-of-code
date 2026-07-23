@@ -1,11 +1,13 @@
 use std::{
-    fs,
+    fs::OpenOptions,
+    io::Write,
     path::{Path, PathBuf},
     str::FromStr,
 };
 
 use chrono::prelude::*;
 use clap::Args;
+use std::process::Command;
 
 use crate::utils;
 
@@ -53,6 +55,18 @@ pub fn is_able_to_setup_submission(path: PathBuf, override_flag: bool) -> bool {
     !path.exists() || override_flag
 }
 
+fn append_cargo_deps(submission_path: &Path) {
+    let cargo_file = submission_path.join("Cargo.toml");
+
+    let mut file = OpenOptions::new().append(true).open(cargo_file).unwrap();
+
+    file.write_all(b"aoc_libraries.workspace = true\n")
+        .expect("Unable to add workspace dep: aoc_libraries");
+
+    file.write_all(b"aoc_macros.workspace = true\n")
+        .expect("Unable to add workspace dep: aoc_macros");
+}
+
 pub fn generate(opts: &GenerateOptions) {
     let cwd = PathBuf::from_str(&utils::fs::get_cwd()).expect("smh getting cwd broke.");
 
@@ -68,24 +82,17 @@ pub fn generate(opts: &GenerateOptions) {
     let submission_path = get_submission_path(cwd, opts.year, opts.day);
 
     if is_able_to_setup_submission(submission_path.clone(), opts.overwrite) {
-        std::fs::DirBuilder::new()
-            .recursive(true)
-            .create(&submission_path)
-            .expect("Unable to create submission directory.");
+        // sometimes I ask myself if rustup ever installs cargo.
+        Command::new("cargo")
+            .arg("init")
+            .arg(&submission_path)
+            .arg("--lib")
+            .args(["--name", &format!("year_{}_day_{}", opts.year, opts.day)])
+            .args(["--vcs", "none"])
+            .output()
+            .expect("Unable to create cargo project.");
 
-        utils::fs::copy_dir_all(template_source_path, &submission_path).expect("We are cooked");
-
-        let cargo_toml_filepath = submission_path.join("Cargo.toml");
-
-        let cargo_toml =
-            fs::read_to_string(&cargo_toml_filepath).expect("Unable to read Cargo.toml content.");
-
-        let cargo_toml = cargo_toml.replace(
-            "year_template_day_template",
-            &format!("year_{}_day_{}", opts.year, opts.day).to_string(),
-        );
-
-        fs::write(&cargo_toml_filepath, cargo_toml).expect("Unable to write new Cargo.toml");
+        append_cargo_deps(&submission_path);
     } else {
         panic!(
             "We do not have the permit to setup submission, maybe --overwrite flag is not supplied?"
