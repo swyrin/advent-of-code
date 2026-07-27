@@ -1,15 +1,17 @@
+use std::fmt::Display;
+
 /// Pad a number to at least length.
-fn pad_number(x: usize, pad_length: usize) -> String {
+fn pad_number(x: impl Display, pad_length: usize) -> String {
     format!("{:0>len$}", x.to_string(), len = pad_length)
 }
 
 /// Pad the year number to at least 4 digits.
-pub fn pad_year_number(x: usize) -> String {
+pub fn pad_year_number(x: impl Display) -> String {
     pad_number(x, 4)
 }
 
 /// Pad the day number to at least 2 digits.
-pub fn pad_day_number(x: usize) -> String {
+pub fn pad_day_number(x: impl Display) -> String {
     pad_number(x, 2)
 }
 

@@ -1,9 +1,8 @@
 use crate::options::options_generate::GenerateOptions;
 use crate::utils::number::{pad_day_number, pad_year_number};
+use std::env;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use std::{env, fs, io};
-use toml_edit::DocumentMut;
 
 /// Get the current working directory.
 pub fn get_cwd() -> String {
@@ -56,6 +55,9 @@ pub fn scaffold_submission_directory(opts: &GenerateOptions) {
 /// Teardown the submission directory. For testing. If clippy yells, blame the macro.
 #[cfg(test)]
 pub fn teardown_submission_directory(opts: &GenerateOptions) {
+    use std::{fs, io};
+    use toml_edit::DocumentMut;
+
     let cwd = get_cwd();
     let cwd = Path::new(cwd.as_str());
 

@@ -1,6 +1,7 @@
+pub mod branded_types;
 mod commands;
-mod utils;
 mod options;
+mod utils;
 
 use crate::commands::generate::generate;
 use crate::options::options_generate::GenerateOptions;
