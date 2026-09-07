@@ -9,6 +9,7 @@ repository = "https://github.com/swyrin/advent-of-code"
 authors = [
     "Tien Dat Pham <hello@swyrin.me>"
 ]
+default-run = "advent_of_code"
 
 [dependencies]
 anyhow = "1.0.104"
