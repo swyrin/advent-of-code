@@ -1,9 +1,0 @@
-[package]
-name = "year_2025_day_06"
-edition.workspace = true
-version.workspace = true
-
-[dependencies]
-aoc_libraries.workspace = true
-aoc_macros.workspace = true
-

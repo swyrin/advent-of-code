@@ -1,57 +1,25 @@
 [package]
-name = "advent-of-code"
-version.workspace = true
-edition.workspace = true
-authors = [
-    "Tien Dat Pham <hello@swyrin.me>"
-]
-
-[workspace]
-members = [
-    "crates/*",
-    "advent_of_code/year_2024/day_01",
-    "advent_of_code/year_2024/day_02",
-    "advent_of_code/year_2024/day_03",
-    "advent_of_code/year_2024/day_04",
-    "advent_of_code/year_2024/day_05",
-    "advent_of_code/year_2024/day_06",
-    "advent_of_code/year_2024/day_07",
-    "advent_of_code/year_2024/day_08",
-    "advent_of_code/year_2024/day_09",
-    "advent_of_code/year_2024/day_10",
-    "advent_of_code/year_2024/day_11",
-    "advent_of_code/year_2024/day_12",
-    "advent_of_code/year_2024/day_13",
-    "advent_of_code/year_2024/day_14",
-    "advent_of_code/year_2025/day_01",
-    "advent_of_code/year_2025/day_02",
-    "advent_of_code/year_2025/day_03",
-    "advent_of_code/year_2025/day_04",
-    "advent_of_code/year_2025/day_05",
-    "advent_of_code/year_2025/day_06",
-    "advent_of_code/year_2025/day_07",
-    "advent_of_code/year_2025/day_08",
-    "advent_of_code/year_2025/day_09",
-    "advent_of_code/year_2025/day_10",
-    "advent_of_code/year_2025/day_11",
-    "advent_of_code/year_2025/day_12"]
-resolver = "3"
-
-[workspace.package]
+name = "advent_of_code"
 version = "0.1.0"
 edition = "2024"
 publish = false
 license-file = "LICENSE.md"
 description = "Random BS go stuffs for Advent of Code."
-homepage = "https://github.com/swyrin/advent-of-code"
 repository = "https://github.com/swyrin/advent-of-code"
-
-[workspace.dependencies]
-aoc_libraries = { path = "crates/aoc_libraries" }
-aoc_macros = { path = "crates/aoc_macros" }
+authors = [
+    "Tien Dat Pham <hello@swyrin.me>"
+]
 
 [dependencies]
-clap = { version = "4.6.4", features = ["derive"] }
-chrono = "0.4.45"
-reqwest = { version = "0.13.4", features = ["blocking", "cookies"] }
-toml_edit = "0.25.13"
+anyhow = "1.0.104"
+aoc-parse = "0.2.18"
+counter = "0.7.1"
+geo = "0.33.1"
+good_lp = { version = "1.15.3", default-features = false, features = ["microlp"] }
+image = { version = "0.25.10", default-features = false, features = ["png"] }
+itertools = "0.15.0"
+petgraph = { version = "0.8.3", features = ["rayon"] }
+range-set-blaze = "0.6.0"
+
+[dev-dependencies]
+parameterized = "2.1.0"

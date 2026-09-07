@@ -2,11 +2,10 @@ name: Test all of my AoC libs & submissions.
 
 on:
   push:
-    branches: [ "main" ]
+  pull_request:
 
 env:
   CARGO_TERM_COLOR: always
-  PRIVATE: 0
 
 jobs:
   build:
@@ -22,4 +21,4 @@ jobs:
           tool: nextest
 
       - name: Run tests
-        run: cargo nextest run --workspace
+        run: cargo nextest run --workspace --all-targets
