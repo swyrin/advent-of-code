@@ -9,16 +9,13 @@ fn main() {
     input_content.read_to_string(&mut buffer).unwrap();
     let input: Input = buffer.as_str().parse().unwrap();
 
-    let ans1 = part_one(&input);
-    let ans2 = part_two(&input);
-
-    if let Ok(ans1) = ans1 {
+    if let Ok(ans1) = part_one(&input) {
         println!("Result of part 1: {ans1}")
     } else {
         println!("Part 1 fails.")
     }
 
-    if let Ok(ans2) = ans2 {
+    if let Ok(ans2) = part_two(&input) {
         println!("Result of part 2: {ans2}")
     } else {
         println!("Part 2 fails.")
@@ -48,6 +45,7 @@ fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[forbid(unsafe_code)]
 fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
+    #[allow(clippy::eq_op, reason = "example.")]
     Ok(input.number - input.number + 420)
 }
 
