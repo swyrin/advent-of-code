@@ -1,3 +1,3 @@
 fn main() {
-    panic!("You should be running individual binaries, not this one. Yes, intentionally set this as default-run.")
+    panic!("You should be running individual binaries by `cargo run --bin xxx`, not `cargo run`.")
 }
