@@ -1,5 +1,5 @@
 [package]
-name = "advent_of_code"
+name = "advent-of-code"
 version = "0.1.0"
 edition = "2024"
 publish = false
@@ -9,7 +9,7 @@ repository = "https://github.com/swyrin/advent-of-code"
 authors = [
     "Tien Dat Pham <hello@swyrin.me>"
 ]
-default-run = "advent_of_code"
+default-run = "advent-of-code"
 
 [dependencies]
 anyhow = "1.0.104"
