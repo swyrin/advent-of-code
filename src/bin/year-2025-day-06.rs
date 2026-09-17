@@ -89,6 +89,7 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
     for column in (0..column_count).rev() {
         let mut parsed_number = 0;
 
+        #[allow(clippy::needless_range_loop, reason = "look under.")]
         for row in 0..row_count - 1 {
             let character = grid[row][column];
 
