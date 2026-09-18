@@ -23,6 +23,7 @@ fn main() {
 }
 
 struct Input {
+    #[allow(unused)]
     pub(crate) number: u32,
 }
 
@@ -39,14 +40,13 @@ impl std::str::FromStr for Input {
 }
 
 #[forbid(unsafe_code)]
-fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    Ok(input.number)
+fn part_one(_input: &Input) -> anyhow::Result<impl std::fmt::Display> {
+    Ok(69)
 }
 
 #[forbid(unsafe_code)]
-fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    #[allow(clippy::eq_op, reason = "example.")]
-    Ok(input.number - input.number + 420)
+fn part_two(_input: &Input) -> anyhow::Result<impl std::fmt::Display> {
+    Ok(420)
 }
 
 #[cfg(test)]
