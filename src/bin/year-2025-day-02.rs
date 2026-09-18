@@ -1,4 +1,5 @@
-use aoc_parse::{parser, prelude::*};
+use aoc_parse::parser;
+use aoc_parse::prelude::*;
 
 fn main() {
     use std::io::Read;
@@ -35,7 +36,9 @@ impl std::str::FromStr for Input {
     fn from_str(content: &str) -> Result<Self, Self::Err> {
         let ranges = parser!(repeat_sep(i64 "-" i64, ",")).parse(content.trim())?;
 
-        Ok(Self { ranges })
+        Ok(Self {
+            ranges,
+        })
     }
 }
 
@@ -81,11 +84,7 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
                 let part = &x[..len];
 
-                let count = x
-                    .as_bytes()
-                    .chunks(len)
-                    .filter(|&x| x == part.as_bytes())
-                    .count();
+                let count = x.as_bytes().chunks(len).filter(|&x| x == part.as_bytes()).count();
 
                 if count * len == l {
                     has_match = true;
@@ -104,8 +103,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,2121212118-2121212124" }, expected = { "1227775554" })]
     fn test_part_1(input: &str, expected: &str) {

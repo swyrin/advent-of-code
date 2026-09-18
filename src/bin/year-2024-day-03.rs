@@ -114,8 +114,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))" }, expected = { "161" })]
     fn test_part_1(input: &str, expected: &str) {

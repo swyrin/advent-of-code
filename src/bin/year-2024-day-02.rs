@@ -1,4 +1,5 @@
-use aoc_parse::{parser, prelude::*};
+use aoc_parse::parser;
+use aoc_parse::prelude::*;
 
 fn main() {
     use std::io::Read;
@@ -37,7 +38,9 @@ impl std::str::FromStr for Input {
     fn from_str(content: &str) -> Result<Self, Self::Err> {
         let reports = parser!(lines(repeat_sep(u32, " "))).parse(content)?;
 
-        Ok(Self { reports })
+        Ok(Self {
+            reports,
+        })
     }
 }
 
@@ -54,11 +57,7 @@ fn is_safe(report: &[u32]) -> bool {
 
 #[forbid(unsafe_code)]
 fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    Ok(input
-        .reports
-        .iter()
-        .filter(|report| is_safe(report))
-        .count())
+    Ok(input.reports.iter().filter(|report| is_safe(report)).count())
 }
 
 #[forbid(unsafe_code)]
@@ -82,8 +81,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"7 6 4 2 1
 1 2 7 8 9

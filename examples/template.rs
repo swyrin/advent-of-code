@@ -1,4 +1,5 @@
-use aoc_parse::{Parser, parser, prelude::*};
+use aoc_parse::prelude::*;
+use aoc_parse::{Parser, parser};
 
 fn main() {
     use std::io::Read;
@@ -51,8 +52,9 @@ fn part_two(_input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { "69" }, expected = { "69" })]
     fn test_part_1(input: &str, expected: &str) {

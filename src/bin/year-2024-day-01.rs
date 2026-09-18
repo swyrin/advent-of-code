@@ -1,4 +1,5 @@
-use aoc_parse::{parser, prelude::*};
+use aoc_parse::parser;
+use aoc_parse::prelude::*;
 use counter::Counter;
 
 fn main() {
@@ -52,20 +53,12 @@ fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
     left.sort_unstable();
     right.sort_unstable();
 
-    Ok(left
-        .into_iter()
-        .zip(right)
-        .map(|(left, right)| left.abs_diff(right))
-        .sum::<u64>())
+    Ok(left.into_iter().zip(right).map(|(left, right)| left.abs_diff(right)).sum::<u64>())
 }
 
 #[forbid(unsafe_code)]
 fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    let right_counts = input
-        .right_values
-        .iter()
-        .copied()
-        .collect::<Counter<u64, u64>>();
+    let right_counts = input.right_values.iter().copied().collect::<Counter<u64, u64>>();
 
     Ok(input
         .left_values
@@ -76,8 +69,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"3   4
 4   3

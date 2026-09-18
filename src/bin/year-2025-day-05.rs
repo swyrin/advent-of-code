@@ -1,4 +1,5 @@
-use aoc_parse::{parser, prelude::*};
+use aoc_parse::parser;
+use aoc_parse::prelude::*;
 use range_set_blaze::RangeSetBlaze;
 
 fn main() {
@@ -39,17 +40,16 @@ impl std::str::FromStr for Input {
             parser!(section(lines(i64 "-" i64)) section(lines(i64))).parse(content)?;
         let ranges = RangeSetBlaze::from_iter(ranges.into_iter().map(|(start, end)| start..=end));
 
-        Ok(Self { ranges, numbers })
+        Ok(Self {
+            ranges,
+            numbers,
+        })
     }
 }
 
 #[forbid(unsafe_code)]
 fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    Ok(input
-        .numbers
-        .iter()
-        .filter(|&number| input.ranges.contains(*number))
-        .count())
+    Ok(input.numbers.iter().filter(|&number| input.ranges.contains(*number)).count())
 }
 
 #[forbid(unsafe_code)]
@@ -59,8 +59,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"3-5
 10-14

@@ -1,4 +1,5 @@
-use aoc_parse::{parser, prelude::*};
+use aoc_parse::parser;
+use aoc_parse::prelude::*;
 
 fn main() {
     use std::io::Read;
@@ -39,7 +40,9 @@ impl std::str::FromStr for Input {
         }))
         .parse(content)?;
 
-        Ok(Self { moves })
+        Ok(Self {
+            moves,
+        })
     }
 }
 
@@ -52,13 +55,13 @@ fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
         match direction {
             'L' => {
                 pos = (pos - amount) % 100;
-            }
+            },
             'R' => {
                 pos = (pos + amount) % 100;
-            }
+            },
             _ => {
                 panic!("Not a valid direction.")
-            }
+            },
         }
 
         if pos == 0 {
@@ -86,17 +89,17 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
                 }
 
                 pos = (pos - amount).rem_euclid(100);
-            }
+            },
             'R' => {
                 if pos != 0 && pos + amount >= 100 {
                     count += 1;
                 }
 
                 pos = (pos + amount).rem_euclid(100);
-            }
+            },
             _ => {
                 panic!("Not a valid direction.")
-            }
+            },
         }
     }
 
@@ -105,8 +108,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"L68
 L30

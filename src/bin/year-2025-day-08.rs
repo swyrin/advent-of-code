@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use aoc_parse::{parser, prelude::*};
+use aoc_parse::parser;
+use aoc_parse::prelude::*;
 use itertools::Itertools;
 use petgraph::unionfind::UnionFind;
 
@@ -57,7 +58,9 @@ impl std::str::FromStr for Input {
         ))
         .parse(content)?;
 
-        Ok(Self { points })
+        Ok(Self {
+            points,
+        })
     }
 }
 
@@ -84,17 +87,10 @@ fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
     let mut component_sizes = HashMap::new();
     for point in 0..points.len() {
-        *component_sizes
-            .entry(components.find_mut(point))
-            .or_insert(0_usize) += 1;
+        *component_sizes.entry(components.find_mut(point)).or_insert(0_usize) += 1;
     }
 
-    Ok(component_sizes
-        .values()
-        .sorted_unstable()
-        .rev()
-        .take(3)
-        .product::<usize>())
+    Ok(component_sizes.values().sorted_unstable().rev().take(3).product::<usize>())
 }
 
 #[forbid(unsafe_code)]
@@ -119,8 +115,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"162,817,812
 57,618,57

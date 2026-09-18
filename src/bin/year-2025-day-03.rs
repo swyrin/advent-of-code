@@ -32,7 +32,9 @@ impl std::str::FromStr for Input {
 
     fn from_str(content: &str) -> Result<Self, Self::Err> {
         let lines = content.lines().map(|s| s.to_string()).collect();
-        Ok(Self { lines })
+        Ok(Self {
+            lines,
+        })
     }
 }
 
@@ -145,8 +147,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"987654321111111
 811111111111119

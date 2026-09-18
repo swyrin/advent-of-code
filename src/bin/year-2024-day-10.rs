@@ -81,9 +81,8 @@ impl std::str::FromStr for Input {
                     let Some(neighbour_column) = usize::try_from(neighbour_column).ok() else {
                         continue;
                     };
-                    let Some(&neighbour_height) = rows
-                        .get(neighbour_row)
-                        .and_then(|line| line.get(neighbour_column))
+                    let Some(&neighbour_height) =
+                        rows.get(neighbour_row).and_then(|line| line.get(neighbour_column))
                     else {
                         continue;
                     };
@@ -99,7 +98,9 @@ impl std::str::FromStr for Input {
             }
         }
 
-        Ok(Self { graph })
+        Ok(Self {
+            graph,
+        })
     }
 }
 
@@ -115,10 +116,7 @@ fn count_trails(
     let count = if graph[node] == 9 {
         1
     } else {
-        graph
-            .neighbors(node)
-            .map(|next| count_trails(graph, next, memo))
-            .sum()
+        graph.neighbors(node).map(|next| count_trails(graph, next, memo)).sum()
     };
 
     memo.insert(node, count);
@@ -129,11 +127,7 @@ fn count_trails(
 fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
     let mut total = 0;
 
-    for trailhead in input
-        .graph
-        .node_indices()
-        .filter(|&node| input.graph[node] == 0)
-    {
+    for trailhead in input.graph.node_indices().filter(|&node| input.graph[node] == 0) {
         let mut search = Bfs::new(&input.graph, trailhead);
         let mut count = 0;
 
@@ -163,8 +157,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"89010123
 78121874

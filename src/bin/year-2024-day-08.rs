@@ -59,10 +59,7 @@ impl std::str::FromStr for Input {
         for (row, line) in rows.iter().enumerate() {
             for (column, &frequency) in line.iter().enumerate() {
                 if frequency.is_ascii_alphanumeric() {
-                    antennas
-                        .entry(frequency)
-                        .or_default()
-                        .push((row as isize, column as isize));
+                    antennas.entry(frequency).or_default().push((row as isize, column as isize));
                 }
             }
         }
@@ -93,10 +90,7 @@ fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
         }
     }
 
-    Ok(antinodes
-        .into_iter()
-        .filter(|&position| input.in_bounds(position))
-        .count())
+    Ok(antinodes.into_iter().filter(|&position| input.in_bounds(position)).count())
 }
 
 #[forbid(unsafe_code)]
@@ -126,8 +120,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"............
 ........0...

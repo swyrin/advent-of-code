@@ -46,7 +46,9 @@ impl std::str::FromStr for Input {
             return Err("invalid word-search grid: ragged rows".to_string());
         }
 
-        Ok(Self { grid })
+        Ok(Self {
+            grid,
+        })
     }
 }
 
@@ -62,23 +64,13 @@ fn cell(grid: &[Vec<u8>], row: isize, column: isize) -> Option<u8> {
         return None;
     }
 
-    grid.get(row as usize)
-        .and_then(|line| line.get(column as usize))
-        .copied()
+    grid.get(row as usize).and_then(|line| line.get(column as usize)).copied()
 }
 
 #[forbid(unsafe_code)]
 fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    const DIRECTIONS: [(isize, isize); 8] = [
-        (-1, -1),
-        (-1, 0),
-        (-1, 1),
-        (0, -1),
-        (0, 1),
-        (1, -1),
-        (1, 0),
-        (1, 1),
-    ];
+    const DIRECTIONS: [(isize, isize); 8] =
+        [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)];
     const WORD: &[u8] = b"XMAS";
 
     Ok(input
@@ -127,8 +119,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"MMMSXXMASM
 MSAMXMSMSA

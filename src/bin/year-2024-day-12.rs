@@ -50,7 +50,9 @@ impl std::str::FromStr for Input {
             return Err("invalid garden map: ragged rows".to_string());
         }
 
-        Ok(Self { garden })
+        Ok(Self {
+            garden,
+        })
     }
 }
 
@@ -60,10 +62,7 @@ impl Input {
             return None;
         }
 
-        self.garden
-            .get(row as usize)
-            .and_then(|line| line.get(column as usize))
-            .copied()
+        self.garden.get(row as usize).and_then(|line| line.get(column as usize)).copied()
     }
 
     fn regions(&self) -> Vec<HashSet<Position>> {
@@ -118,12 +117,8 @@ fn perimeter(region: &HashSet<Position>) -> usize {
 }
 
 fn side_count(region: &HashSet<Position>) -> usize {
-    const CORNERS: [(Position, Position); 4] = [
-        ((-1, 0), (0, -1)),
-        ((-1, 0), (0, 1)),
-        ((1, 0), (0, -1)),
-        ((1, 0), (0, 1)),
-    ];
+    const CORNERS: [(Position, Position); 4] =
+        [((-1, 0), (0, -1)), ((-1, 0), (0, 1)), ((1, 0), (0, -1)), ((1, 0), (0, 1))];
 
     region
         .iter()
@@ -147,26 +142,19 @@ fn side_count(region: &HashSet<Position>) -> usize {
 
 #[forbid(unsafe_code)]
 fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    Ok(input
-        .regions()
-        .into_iter()
-        .map(|region| region.len() * perimeter(&region))
-        .sum::<usize>())
+    Ok(input.regions().into_iter().map(|region| region.len() * perimeter(&region)).sum::<usize>())
 }
 
 #[forbid(unsafe_code)]
 fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    Ok(input
-        .regions()
-        .into_iter()
-        .map(|region| region.len() * side_count(&region))
-        .sum::<usize>())
+    Ok(input.regions().into_iter().map(|region| region.len() * side_count(&region)).sum::<usize>())
 }
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"RRRRIICCFF
 RRRRIICCCF

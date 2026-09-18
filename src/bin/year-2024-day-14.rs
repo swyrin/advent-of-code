@@ -1,4 +1,5 @@
-use aoc_parse::{parser, prelude::*};
+use aoc_parse::parser;
+use aoc_parse::prelude::*;
 use image::{GrayImage, Luma};
 
 fn main() {
@@ -60,7 +61,10 @@ impl std::str::FromStr for Input {
             ACTUAL_DIMENSIONS
         };
 
-        Ok(Self { robots, dimensions })
+        Ok(Self {
+            robots,
+            dimensions,
+        })
     }
 }
 
@@ -100,11 +104,8 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
     let seconds = 7000;
 
     for second in 1..=seconds {
-        let mut canvas = GrayImage::from_pixel(
-            input.dimensions.0 as u32,
-            input.dimensions.1 as u32,
-            Luma([0]),
-        );
+        let mut canvas =
+            GrayImage::from_pixel(input.dimensions.0 as u32, input.dimensions.1 as u32, Luma([0]));
 
         for &robot in &input.robots {
             let (x, y) = position_at(robot, second, input.dimensions);
@@ -112,9 +113,7 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
             canvas.put_pixel(x, y, Luma([255]));
         }
 
-        canvas
-            .save(format!("images/output_{second}.png"))
-            .expect("Unable to save image");
+        canvas.save(format!("images/output_{second}.png")).expect("Unable to save image");
     }
 
     Ok("This is a joke.")
@@ -122,8 +121,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"p=0,4 v=3,-3
 p=6,3 v=-1,-3

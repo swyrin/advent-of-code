@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 use std::hash::RandomState;
 
-use aoc_parse::{parser, prelude::*};
+use aoc_parse::parser;
+use aoc_parse::prelude::*;
 use petgraph::algo::all_simple_paths;
 use petgraph::graph::{DiGraph, NodeIndex};
 
@@ -50,7 +51,9 @@ impl std::str::FromStr for Input {
         ))
         .parse(content)?;
 
-        Ok(Self { entries })
+        Ok(Self {
+            entries,
+        })
     }
 }
 
@@ -98,11 +101,7 @@ fn count_routes(
             .map(|next| {
                 count_routes(
                     connections,
-                    (
-                        next.clone(),
-                        seen_dac || next == "dac",
-                        seen_fft || next == "fft",
-                    ),
+                    (next.clone(), seen_dac || next == "dac", seen_fft || next == "fft"),
                     memo,
                 )
             })
@@ -115,23 +114,17 @@ fn count_routes(
 
 #[forbid(unsafe_code)]
 fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    let connections: HashMap<_, _> = input
-        .entries
-        .iter()
-        .map(|entry| (entry.from.clone(), entry.neighbors.clone()))
-        .collect();
+    let connections: HashMap<_, _> =
+        input.entries.iter().map(|entry| (entry.from.clone(), entry.neighbors.clone())).collect();
 
-    Ok(count_routes(
-        &connections,
-        ("svr".to_string(), false, false),
-        &mut HashMap::new(),
-    ))
+    Ok(count_routes(&connections, ("svr".to_string(), false, false), &mut HashMap::new()))
 }
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"aaa: you hhh
 you: bbb ccc

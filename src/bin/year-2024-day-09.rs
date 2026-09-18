@@ -96,13 +96,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
         let Some(start) = disk.iter().position(|&entry| entry == Some(file_id)) else {
             continue;
         };
-        let length = disk[start..]
-            .iter()
-            .take_while(|&&entry| entry == Some(file_id))
-            .count();
-        let Some(destination) = disk[..start]
-            .windows(length)
-            .position(|window| window.iter().all(Option::is_none))
+        let length = disk[start..].iter().take_while(|&&entry| entry == Some(file_id)).count();
+        let Some(destination) =
+            disk[..start].windows(length).position(|window| window.iter().all(Option::is_none))
         else {
             continue;
         };
@@ -118,8 +114,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { "2333133121414131402" }, expected = { "1928" })]
     fn test_part_1(input: &str, expected: &str) {

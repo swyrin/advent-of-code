@@ -61,16 +61,16 @@ impl std::str::FromStr for Input {
             return Err("guard map has no starting position".to_string());
         };
 
-        Ok(Self { grid, start })
+        Ok(Self {
+            grid,
+            start,
+        })
     }
 }
 
 impl Input {
     fn cell(&self, (row, column): Position) -> Option<u8> {
-        self.grid
-            .get(row)
-            .and_then(|line| line.get(column))
-            .copied()
+        self.grid.get(row).and_then(|line| line.get(column)).copied()
     }
 
     fn walk(&self, extra_obstacle: Option<Position>) -> (bool, HashSet<Position>) {
@@ -83,10 +83,8 @@ impl Input {
 
         loop {
             let delta = DIRECTIONS[direction];
-            let Some(next) = position
-                .0
-                .checked_add_signed(delta.0)
-                .zip(position.1.checked_add_signed(delta.1))
+            let Some(next) =
+                position.0.checked_add_signed(delta.0).zip(position.1.checked_add_signed(delta.1))
             else {
                 return (false, visited);
             };
@@ -127,8 +125,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"....#.....
 .........#

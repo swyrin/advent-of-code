@@ -77,11 +77,7 @@ fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 #[forbid(unsafe_code)]
 fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
     let mut total = 0u128;
-    let grid: Vec<Vec<char>> = input
-        .content
-        .lines()
-        .map(|line| line.chars().collect())
-        .collect();
+    let grid: Vec<Vec<char>> = input.content.lines().map(|line| line.chars().collect()).collect();
     let row_count = grid.len();
     let column_count = grid.first().map_or(0, |row| row.len());
     let mut numbers: Vec<u32> = vec![];
@@ -128,8 +124,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { "123 328  51 64 \n 45 64  387 23 \n  6 98  215 314\n*   +   *   +  " }, expected = { "4277556" })]
     fn test_part_1(input: &str, expected: &str) {

@@ -1,4 +1,5 @@
-use aoc_parse::{parser, prelude::*};
+use aoc_parse::parser;
+use aoc_parse::prelude::*;
 
 fn main() {
     use std::io::Read;
@@ -54,7 +55,9 @@ impl std::str::FromStr for Input {
         })
         .collect();
 
-        Ok(Self { machines })
+        Ok(Self {
+            machines,
+        })
     }
 }
 
@@ -105,8 +108,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"Button A: X+94, Y+34
 Button B: X+22, Y+67

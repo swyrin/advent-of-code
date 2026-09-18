@@ -45,7 +45,9 @@ impl std::str::FromStr for Input {
             return Err("invalid grid: ragged rows".to_string());
         }
 
-        Ok(Self { grid })
+        Ok(Self {
+            grid,
+        })
     }
 }
 
@@ -59,31 +61,21 @@ impl Input {
         &self,
         (row, column): (usize, usize),
     ) -> impl Iterator<Item = (usize, usize)> + '_ {
-        const DIRECTIONS: [(isize, isize); 8] = [
-            (-1, -1),
-            (-1, 0),
-            (-1, 1),
-            (0, -1),
-            (0, 1),
-            (1, -1),
-            (1, 0),
-            (1, 1),
-        ];
+        const DIRECTIONS: [(isize, isize); 8] =
+            [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)];
 
-        DIRECTIONS
-            .into_iter()
-            .filter_map(move |(delta_row, delta_column)| {
-                let row = row as isize + delta_row;
-                let column = column as isize + delta_column;
+        DIRECTIONS.into_iter().filter_map(move |(delta_row, delta_column)| {
+            let row = row as isize + delta_row;
+            let column = column as isize + delta_column;
 
-                if row < 0 || column < 0 {
-                    return None;
-                }
+            if row < 0 || column < 0 {
+                return None;
+            }
 
-                let (row, column) = (row as usize, column as usize);
-                self.grid.get(row)?.get(column)?;
-                Some((row, column))
-            })
+            let (row, column) = (row as usize, column as usize);
+            self.grid.get(row)?.get(column)?;
+            Some((row, column))
+        })
     }
 }
 
@@ -134,8 +126,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"..@@.@@@@.
 @@@.@.@.@@

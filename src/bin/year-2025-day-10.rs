@@ -1,8 +1,16 @@
 use std::collections::{HashSet, VecDeque};
 
-use aoc_parse::{parser, prelude::*};
+use aoc_parse::parser;
+use aoc_parse::prelude::*;
 use good_lp::{
-    Expression, IntoAffineExpression, Solution, SolverModel, Variable, microlp, variable, variables,
+    Expression,
+    IntoAffineExpression,
+    Solution,
+    SolverModel,
+    Variable,
+    microlp,
+    variable,
+    variables,
 };
 
 fn main() {
@@ -57,7 +65,9 @@ impl std::str::FromStr for Input {
         ))
         .parse(content)?;
 
-        Ok(Self { machines })
+        Ok(Self {
+            machines,
+        })
     }
 }
 
@@ -117,10 +127,7 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
         }
 
         let solution = optimization.solve().unwrap();
-        let press_count = presses
-            .iter()
-            .map(|&press| solution.value(press))
-            .sum::<f64>();
+        let press_count = presses.iter().map(|&press| solution.value(press)).sum::<f64>();
         total += press_count.round() as u128;
     }
 
@@ -129,8 +136,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
 [...#.] (0,2,3,4) (2,3) (0,4) (0,1,2) (1,2,3,4) {7,5,12,7,2}

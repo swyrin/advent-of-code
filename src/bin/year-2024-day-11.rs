@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use aoc_parse::{parser, prelude::*};
+use aoc_parse::parser;
+use aoc_parse::prelude::*;
 
 fn main() {
     use std::io::Read;
@@ -37,7 +38,9 @@ impl std::str::FromStr for Input {
     fn from_str(content: &str) -> Result<Self, Self::Err> {
         let stones = parser!(repeat_sep(u128, " ")).parse(content.trim())?;
 
-        Ok(Self { stones })
+        Ok(Self {
+            stones,
+        })
     }
 }
 
@@ -87,8 +90,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { "125 17" }, expected = { "55312" })]
     fn test_part_1(input: &str, expected: &str) {

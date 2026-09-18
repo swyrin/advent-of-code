@@ -1,4 +1,5 @@
-use aoc_parse::{parser, prelude::*};
+use aoc_parse::parser;
+use aoc_parse::prelude::*;
 use geo::{Contains, LineString, Point, Polygon, Rect, point};
 use itertools::Itertools;
 
@@ -37,7 +38,9 @@ impl std::str::FromStr for Input {
     fn from_str(content: &str) -> Result<Self, Self::Err> {
         let points = parser!(lines(i128 "," i128)).parse(content)?;
 
-        Ok(Self { points })
+        Ok(Self {
+            points,
+        })
     }
 }
 
@@ -59,11 +62,8 @@ fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[forbid(unsafe_code)]
 fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    let points: Vec<Point> = input
-        .points
-        .iter()
-        .map(|&(x, y)| point! { x: x as f64, y: y as f64 })
-        .collect();
+    let points: Vec<Point> =
+        input.points.iter().map(|&(x, y)| point! { x: x as f64, y: y as f64 }).collect();
 
     let polygon = Polygon::new(LineString::from(points.clone()), vec![]);
     let mut max_area = 0_u128;
@@ -84,8 +84,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"7,1
 11,1

@@ -1,6 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
-use aoc_parse::{parser, prelude::*};
+use aoc_parse::parser;
+use aoc_parse::prelude::*;
 
 fn main() {
     use std::io::Read;
@@ -42,16 +43,16 @@ impl std::str::FromStr for Input {
         )
         .parse(content)?;
 
-        Ok(Self { rules, updates })
+        Ok(Self {
+            rules,
+            updates,
+        })
     }
 }
 
 fn is_ordered(update: &[u32], rules: &[(u32, u32)]) -> bool {
-    let positions = update
-        .iter()
-        .enumerate()
-        .map(|(index, page)| (*page, index))
-        .collect::<HashMap<_, _>>();
+    let positions =
+        update.iter().enumerate().map(|(index, page)| (*page, index)).collect::<HashMap<_, _>>();
 
     rules.iter().all(|(before, after)| {
         let Some(before_index) = positions.get(before) else {
@@ -66,11 +67,8 @@ fn is_ordered(update: &[u32], rules: &[(u32, u32)]) -> bool {
 
 fn reorder(update: &[u32], rules: &[(u32, u32)]) -> Vec<u32> {
     let pages = update.iter().copied().collect::<HashSet<_>>();
-    let mut indegree = update
-        .iter()
-        .copied()
-        .map(|page| (page, 0_usize))
-        .collect::<HashMap<_, _>>();
+    let mut indegree =
+        update.iter().copied().map(|page| (page, 0_usize)).collect::<HashMap<_, _>>();
     let mut outgoing = HashMap::<u32, Vec<u32>>::new();
     let mut edges = HashSet::new();
 
@@ -85,10 +83,8 @@ fn reorder(update: &[u32], rules: &[(u32, u32)]) -> Vec<u32> {
     let mut emitted = HashSet::new();
 
     while ordered.len() < update.len() {
-        let Some(next) = update
-            .iter()
-            .copied()
-            .find(|page| !emitted.contains(page) && indegree[page] == 0)
+        let Some(next) =
+            update.iter().copied().find(|page| !emitted.contains(page) && indegree[page] == 0)
         else {
             return update.to_vec();
         };
@@ -126,8 +122,9 @@ fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use parameterized::parameterized;
+
+    use super::*;
 
     #[parameterized(input = { r"47|53
 97|13
