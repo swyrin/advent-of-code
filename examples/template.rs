@@ -23,6 +23,7 @@ fn main() {
     }
 }
 
+#[derive(Debug, Clone)]
 struct Input {
     #[allow(unused)]
     pub(crate) number: u32,
