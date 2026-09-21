@@ -20,7 +20,7 @@ good_lp = { version = "1.15.3", default-features = false, features = ["microlp"]
 image = { version = "0.25.10", default-features = false, features = ["png"] }
 itertools = "0.15.0"
 petgraph = { version = "0.8.3", features = ["rayon"] }
-range-set-blaze = "0.6.0"
+range-set-blaze = "0.7.0"
 
 [dev-dependencies]
 parameterized = "2.1.0"
