@@ -9,7 +9,15 @@ repository = "https://github.com/swyrin/advent-of-code"
 authors = [
     "Tien Dat Pham <hello@swyrin.me>"
 ]
-default-run = "advent-of-code"
+
+[workspace]
+members = [
+    ".",
+    "crates/macros"
+]
+
+[workspace.dependencies]
+macros = { path = "crates/macros" }
 
 [dependencies]
 anyhow = "1.0.104"
@@ -21,6 +29,7 @@ image = { version = "0.25.10", default-features = false, features = ["png"] }
 itertools = "0.15.0"
 petgraph = { version = "0.8.3", features = ["rayon"] }
 range-set-blaze = "0.7.0"
+macros = { workspace = true }
 
 [dev-dependencies]
 parameterized = "2.1.0"
