@@ -1,62 +1,47 @@
 use std::collections::{HashMap, HashSet};
 
 use itertools::Itertools;
-
-fn main() {
-    use std::io::Read;
-
-    let mut input_content = std::fs::File::open("input.txt").expect("No input.txt file");
-    let mut buffer = String::new();
-
-    input_content.read_to_string(&mut buffer).unwrap();
-    let input: Input = buffer.as_str().parse().unwrap();
-
-    let ans1 = part_one(&input);
-    let ans2 = part_two(&input);
-
-    if let Ok(ans1) = ans1 {
-        println!("Result of part 1: {ans1}")
-    } else {
-        println!("Part 1 fails.")
-    }
-
-    if let Ok(ans2) = ans2 {
-        println!("Result of part 2: {ans2}")
-    } else {
-        println!("Part 2 fails.")
-    }
-}
+use macros::{AocInput, aoc};
 
 type Position = (isize, isize);
 
+#[derive(AocInput)]
 struct Input {
-    rows: isize,
-    columns: isize,
-    antennas: HashMap<char, Vec<Position>>,
+    #[parse(rows:lines(string(any_char+)) => to_grid(rows))]
+    pub(crate) grid: Vec<Vec<char>>,
 }
 
-impl std::str::FromStr for Input {
-    type Err = String;
+fn to_grid(rows: Vec<String>) -> Vec<Vec<char>> {
+    let grid = rows
+        .into_iter()
+        .filter(|line| !line.is_empty())
+        .map(|line| line.chars().collect::<Vec<_>>())
+        .collect::<Vec<_>>();
 
-    fn from_str(content: &str) -> Result<Self, Self::Err> {
-        let rows = content
-            .lines()
-            .filter(|line| !line.is_empty())
-            .map(str::chars)
-            .map(|characters| characters.collect::<Vec<_>>())
-            .collect::<Vec<_>>();
+    if grid.is_empty() {
+        panic!("invalid antenna map: empty");
+    }
 
-        if rows.is_empty() {
-            return Err("invalid antenna map: empty".to_string());
-        }
+    if grid.iter().any(|row| row.len() != grid[0].len()) {
+        panic!("invalid antenna map: ragged rows");
+    }
 
-        if rows.iter().any(|row| row.len() != rows[0].len()) {
-            return Err("invalid antenna map: ragged rows".to_string());
-        }
+    grid
+}
 
+impl Input {
+    fn rows(&self) -> isize {
+        self.grid.len() as isize
+    }
+
+    fn columns(&self) -> isize {
+        self.grid[0].len() as isize
+    }
+
+    fn antennas(&self) -> HashMap<char, Vec<Position>> {
         let mut antennas = HashMap::<char, Vec<Position>>::new();
 
-        for (row, line) in rows.iter().enumerate() {
+        for (row, line) in self.grid.iter().enumerate() {
             for (column, &frequency) in line.iter().enumerate() {
                 if frequency.is_ascii_alphanumeric() {
                     antennas.entry(frequency).or_default().push((row as isize, column as isize));
@@ -64,67 +49,17 @@ impl std::str::FromStr for Input {
             }
         }
 
-        Ok(Self {
-            rows: rows.len() as isize,
-            columns: rows[0].len() as isize,
-            antennas,
-        })
+        antennas
     }
-}
 
-impl Input {
     fn in_bounds(&self, (row, column): Position) -> bool {
-        (0..self.rows).contains(&row) && (0..self.columns).contains(&column)
+        (0..self.rows()).contains(&row) && (0..self.columns()).contains(&column)
     }
 }
 
-#[forbid(unsafe_code)]
-fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    let mut antinodes = HashSet::new();
-
-    for locations in input.antennas.values() {
-        for [first, second] in locations.iter().copied().array_combinations() {
-            let delta = (second.0 - first.0, second.1 - first.1);
-            antinodes.insert((first.0 - delta.0, first.1 - delta.1));
-            antinodes.insert((second.0 + delta.0, second.1 + delta.1));
-        }
-    }
-
-    Ok(antinodes.into_iter().filter(|&position| input.in_bounds(position)).count())
-}
-
-#[forbid(unsafe_code)]
-fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    let mut antinodes = HashSet::new();
-
-    for locations in input.antennas.values() {
-        for [first, second] in locations.iter().copied().array_combinations() {
-            let delta = (second.0 - first.0, second.1 - first.1);
-
-            let mut position = first;
-            while input.in_bounds(position) {
-                antinodes.insert(position);
-                position = (position.0 - delta.0, position.1 - delta.1);
-            }
-
-            let mut position = second;
-            while input.in_bounds(position) {
-                antinodes.insert(position);
-                position = (position.0 + delta.0, position.1 + delta.1);
-            }
-        }
-    }
-
-    Ok(antinodes.len())
-}
-
-#[cfg(test)]
-mod test {
-    use parameterized::parameterized;
-
-    use super::*;
-
-    #[parameterized(input = { r"............
+aoc! {
+    #[sample(
+        input = "............
 ........0...
 .....0......
 .......0....
@@ -135,17 +70,26 @@ mod test {
 ........A...
 .........A..
 ............
-............" }, expected = { "14" })]
-    fn test_part_1(input: &str, expected: &str) {
-        let input = input.parse().unwrap();
-        let answer = part_one(&input);
+............",
+        expected = "14"
+    )]
+    fn part_one(input @ Input { .. }: &Input) -> impl std::fmt::Display {
+        let mut antinodes = HashSet::new();
+        let antennas = input.antennas();
 
-        if let Ok(actual) = answer {
-            assert_eq!(actual.to_string(), expected.to_string());
+        for locations in antennas.values() {
+            for [first, second] in locations.iter().copied().array_combinations() {
+                let delta = (second.0 - first.0, second.1 - first.1);
+                antinodes.insert((first.0 - delta.0, first.1 - delta.1));
+                antinodes.insert((second.0 + delta.0, second.1 + delta.1));
+            }
         }
+
+        antinodes.into_iter().filter(|&position| input.in_bounds(position)).count()
     }
 
-    #[parameterized(input = { r"............
+    #[sample(
+        input = "............
 ........0...
 .....0......
 .......0....
@@ -156,13 +100,31 @@ mod test {
 ........A...
 .........A..
 ............
-............" }, expected = { "34" })]
-    fn test_part_2(input: &str, expected: &str) {
-        let input = input.parse().unwrap();
-        let answer = part_two(&input);
+............",
+        expected = "34"
+    )]
+    fn part_two(input @ Input { .. }: &Input) -> impl std::fmt::Display {
+        let mut antinodes = HashSet::new();
+        let antennas = input.antennas();
 
-        if let Ok(actual) = answer {
-            assert_eq!(actual.to_string(), expected.to_string());
+        for locations in antennas.values() {
+            for [first, second] in locations.iter().copied().array_combinations() {
+                let delta = (second.0 - first.0, second.1 - first.1);
+
+                let mut position = first;
+                while input.in_bounds(position) {
+                    antinodes.insert(position);
+                    position = (position.0 - delta.0, position.1 - delta.1);
+                }
+
+                let mut position = second;
+                while input.in_bounds(position) {
+                    antinodes.insert(position);
+                    position = (position.0 + delta.0, position.1 + delta.1);
+                }
+            }
         }
+
+        antinodes.len()
     }
 }

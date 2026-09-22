@@ -4,9 +4,5 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-proc-macro2 = "1.0.107"
-quote = "1.0.47"
-syn = { version = "3.0.6", features = ["full"] }
-
-[lib]
-proc-macro = true
+aoc-parse = "0.2.18"
+macros_impl = { workspace = true }

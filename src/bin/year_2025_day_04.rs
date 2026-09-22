@@ -1,54 +1,23 @@
-fn main() {
-    use std::io::Read;
+use macros::{AocInput, aoc};
 
-    let mut input_content = std::fs::File::open("input.txt").expect("No input.txt file");
-    let mut buffer = String::new();
-
-    input_content.read_to_string(&mut buffer).unwrap();
-    let input: Input = buffer.as_str().parse().unwrap();
-
-    let ans1 = part_one(&input);
-    let ans2 = part_two(&input);
-
-    if let Ok(ans1) = ans1 {
-        println!("Result of part 1: {ans1}")
-    } else {
-        println!("Part 1 fails.")
-    }
-
-    if let Ok(ans2) = ans2 {
-        println!("Result of part 2: {ans2}")
-    } else {
-        println!("Part 2 fails.")
-    }
-}
-
+#[derive(AocInput)]
 struct Input {
+    #[parse(rows:lines(string(any_char+)) => to_grid(rows))]
     grid: Vec<Vec<char>>,
 }
 
-impl std::str::FromStr for Input {
-    type Err = String;
+fn to_grid(rows: Vec<String>) -> Vec<Vec<char>> {
+    let grid = rows.into_iter().map(|line| line.chars().collect::<Vec<_>>()).collect::<Vec<_>>();
 
-    fn from_str(content: &str) -> Result<Self, Self::Err> {
-        let grid = content
-            .lines()
-            .map(str::chars)
-            .map(|characters| characters.collect::<Vec<_>>())
-            .collect::<Vec<_>>();
-
-        if grid.is_empty() {
-            return Err("invalid grid: empty".to_string());
-        }
-
-        if grid.iter().any(|row| row.len() != grid[0].len()) {
-            return Err("invalid grid: ragged rows".to_string());
-        }
-
-        Ok(Self {
-            grid,
-        })
+    if grid.is_empty() {
+        panic!("invalid grid: empty");
     }
+
+    if grid.iter().any(|row| row.len() != grid[0].len()) {
+        panic!("invalid grid: ragged rows");
+    }
+
+    grid
 }
 
 impl Input {
@@ -98,39 +67,9 @@ fn removable_rolls(grid: &[Vec<char>]) -> Vec<(usize, usize)> {
         .collect()
 }
 
-#[forbid(unsafe_code)]
-fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    Ok(removable_rolls(&input.grid).len())
-}
-
-#[forbid(unsafe_code)]
-fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    let mut grid = input.grid.clone();
-    let mut destroy_count = 0;
-
-    loop {
-        let rolls = removable_rolls(&grid);
-
-        if rolls.is_empty() {
-            break;
-        }
-
-        destroy_count += rolls.len();
-        for (row, column) in rolls {
-            grid[row][column] = '.';
-        }
-    }
-
-    Ok(destroy_count)
-}
-
-#[cfg(test)]
-mod test {
-    use parameterized::parameterized;
-
-    use super::*;
-
-    #[parameterized(input = { r"..@@.@@@@.
+aoc! {
+    #[sample(
+        input = "..@@.@@@@.
 @@@.@.@.@@
 @@@@@.@.@@
 @.@@@@..@.
@@ -139,17 +78,15 @@ mod test {
 .@.@.@.@@@
 @.@@@.@@@@
 .@@@@@@@@.
-@.@.@@@.@." }, expected = { "13" })]
-    fn test_part_1(input: &str, expected: &str) {
-        let input = input.parse().unwrap();
-        let answer = part_one(&input);
-
-        if let Ok(actual) = answer {
-            assert_eq!(actual.to_string(), expected.to_string());
-        }
+@.@.@@@.@.",
+        expected = "13"
+    )]
+    fn part_one(Input { grid }: &Input) -> impl std::fmt::Display {
+        removable_rolls(grid).len()
     }
 
-    #[parameterized(input = { r"..@@.@@@@.
+    #[sample(
+        input = "..@@.@@@@.
 @@@.@.@.@@
 @@@@@.@.@@
 @.@@@@..@.
@@ -158,13 +95,26 @@ mod test {
 .@.@.@.@@@
 @.@@@.@@@@
 .@@@@@@@@.
-@.@.@@@.@." }, expected = { "43" })]
-    fn test_part_2(input: &str, expected: &str) {
-        let input = input.parse().unwrap();
-        let answer = part_two(&input);
+@.@.@@@.@.",
+        expected = "43"
+    )]
+    fn part_two(Input { grid }: &Input) -> impl std::fmt::Display {
+        let mut grid = grid.clone();
+        let mut destroy_count = 0;
 
-        if let Ok(actual) = answer {
-            assert_eq!(actual.to_string(), expected.to_string());
+        loop {
+            let rolls = removable_rolls(&grid);
+
+            if rolls.is_empty() {
+                break;
+            }
+
+            destroy_count += rolls.len();
+            for (row, column) in rolls {
+                grid[row][column] = '.';
+            }
         }
+
+        destroy_count
     }
 }

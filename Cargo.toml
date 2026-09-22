@@ -9,19 +9,19 @@ repository = "https://github.com/swyrin/advent-of-code"
 authors = [
     "Tien Dat Pham <hello@swyrin.me>"
 ]
+default-run = "advent-of-code"
 
 [workspace]
 members = [
-    ".",
-    "crates/macros"
+    ".", "crates/macros", "crates/macros_impl", "crates/swiss_knife"
 ]
 
 [workspace.dependencies]
 macros = { path = "crates/macros" }
+macros_impl = { path = "crates/macros_impl" }
+swiss_knife = { path = "crates/swiss_knife" }
 
 [dependencies]
-anyhow = "1.0.104"
-aoc-parse = "0.2.18"
 counter = "0.7.1"
 geo = "0.33.1"
 good_lp = { version = "1.15.3", default-features = false, features = ["microlp"] }
@@ -30,9 +30,8 @@ itertools = "0.15.0"
 petgraph = { version = "0.8.3", features = ["rayon"] }
 range-set-blaze = "0.7.0"
 macros = { workspace = true }
-
-[dev-dependencies]
-parameterized = "2.1.0"
+swiss_knife = { workspace = true }
+num = "0.4.3"
 
 [lints.cargo]
 # https://github.com/rust-lang/cargo/issues/17449#issuecomment-5577945337

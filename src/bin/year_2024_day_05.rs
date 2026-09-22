@@ -1,53 +1,13 @@
 use std::collections::{HashMap, HashSet};
 
-use aoc_parse::parser;
-use aoc_parse::prelude::*;
+use macros::{AocInput, aoc};
 
-fn main() {
-    use std::io::Read;
-
-    let mut input_content = std::fs::File::open("input.txt").expect("No input.txt file");
-    let mut buffer = String::new();
-
-    input_content.read_to_string(&mut buffer).unwrap();
-    let input: Input = buffer.as_str().parse().unwrap();
-
-    let ans1 = part_one(&input);
-    let ans2 = part_two(&input);
-
-    if let Ok(ans1) = ans1 {
-        println!("Result of part 1: {ans1}")
-    } else {
-        println!("Part 1 fails.")
-    }
-
-    if let Ok(ans2) = ans2 {
-        println!("Result of part 2: {ans2}")
-    } else {
-        println!("Part 2 fails.")
-    }
-}
-
+#[derive(AocInput)]
 struct Input {
-    rules: Vec<(u32, u32)>,
-    updates: Vec<Vec<u32>>,
-}
-
-impl std::str::FromStr for Input {
-    type Err = aoc_parse::ParseError;
-
-    fn from_str(content: &str) -> Result<Self, Self::Err> {
-        let (rules, updates) = parser!(
-            section(lines(u32 "|" u32))
-            section(lines(repeat_sep(u32, ",")))
-        )
-        .parse(content)?;
-
-        Ok(Self {
-            rules,
-            updates,
-        })
-    }
+    #[parse(section(lines(u32 "|" u32)))]
+    pub(crate) rules: Vec<(u32, u32)>,
+    #[parse(section(lines(repeat_sep(u32, ","))))]
+    pub(crate) updates: Vec<Vec<u32>>,
 }
 
 fn is_ordered(update: &[u32], rules: &[(u32, u32)]) -> bool {
@@ -99,34 +59,9 @@ fn reorder(update: &[u32], rules: &[(u32, u32)]) -> Vec<u32> {
     ordered
 }
 
-#[forbid(unsafe_code)]
-fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    Ok(input
-        .updates
-        .iter()
-        .filter(|update| is_ordered(update, &input.rules))
-        .map(|update| u64::from(update[update.len() / 2]))
-        .sum::<u64>())
-}
-
-#[forbid(unsafe_code)]
-fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    Ok(input
-        .updates
-        .iter()
-        .filter(|update| !is_ordered(update, &input.rules))
-        .map(|update| reorder(update, &input.rules))
-        .map(|update| u64::from(update[update.len() / 2]))
-        .sum::<u64>())
-}
-
-#[cfg(test)]
-mod test {
-    use parameterized::parameterized;
-
-    use super::*;
-
-    #[parameterized(input = { r"47|53
+aoc! {
+    #[sample(
+        input = "47|53
 97|13
 97|61
 97|47
@@ -153,17 +88,19 @@ mod test {
 75,29,13
 75,97,47,61,53
 61,13,29
-97,13,75,29,47" }, expected = { "143" })]
-    fn test_part_1(input: &str, expected: &str) {
-        let input = input.parse().unwrap();
-        let answer = part_one(&input);
-
-        if let Ok(actual) = answer {
-            assert_eq!(actual.to_string(), expected.to_string());
-        }
+97,13,75,29,47",
+        expected = "143"
+    )]
+    fn part_one(Input { rules, updates }: &Input) -> impl std::fmt::Display {
+        updates
+            .iter()
+            .filter(|update| is_ordered(update, rules))
+            .map(|update| u64::from(update[update.len() / 2]))
+            .sum::<u64>()
     }
 
-    #[parameterized(input = { r"47|53
+    #[sample(
+        input = "47|53
 97|13
 97|61
 97|47
@@ -190,13 +127,15 @@ mod test {
 75,29,13
 75,97,47,61,53
 61,13,29
-97,13,75,29,47" }, expected = { "123" })]
-    fn test_part_2(input: &str, expected: &str) {
-        let input = input.parse().unwrap();
-        let answer = part_two(&input);
-
-        if let Ok(actual) = answer {
-            assert_eq!(actual.to_string(), expected.to_string());
-        }
+97,13,75,29,47",
+        expected = "123"
+    )]
+    fn part_two(Input { rules, updates }: &Input) -> impl std::fmt::Display {
+        updates
+            .iter()
+            .filter(|update| !is_ordered(update, rules))
+            .map(|update| reorder(update, rules))
+            .map(|update| u64::from(update[update.len() / 2]))
+            .sum::<u64>()
     }
 }

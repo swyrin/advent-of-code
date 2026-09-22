@@ -1,64 +1,21 @@
-use aoc_parse::parser;
-use aoc_parse::prelude::*;
+use macros::{AocInput, aoc};
 
-fn main() {
-    use std::io::Read;
-
-    let mut input_content = std::fs::File::open("input.txt").expect("No input.txt file");
-    let mut buffer = String::new();
-
-    input_content.read_to_string(&mut buffer).unwrap();
-    let input: Input = buffer.as_str().parse().unwrap();
-
-    let ans1 = part_one(&input);
-    let ans2 = part_two(&input);
-
-    if let Ok(ans1) = ans1 {
-        println!("Result of part 1: {ans1}")
-    } else {
-        println!("Part 1 fails.")
-    }
-
-    if let Ok(ans2) = ans2 {
-        println!("Result of part 2: {ans2}")
-    } else {
-        println!("Part 2 fails.")
-    }
-}
-
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 struct Machine {
     button_a: (i128, i128),
     button_b: (i128, i128),
     prize: (i128, i128),
 }
 
+#[derive(AocInput)]
 struct Input {
+    #[parse(sections(
+        ba:line("Button A: X+" i128 ", Y+" i128)
+        bb:line("Button B: X+" i128 ", Y+" i128)
+        pr:line("Prize: X=" i128 ", Y=" i128)
+        => Machine { button_a: ba, button_b: bb, prize: pr }
+    ))]
     machines: Vec<Machine>,
-}
-
-impl std::str::FromStr for Input {
-    type Err = aoc_parse::ParseError;
-
-    fn from_str(content: &str) -> Result<Self, Self::Err> {
-        let machines = parser!(sections(
-            line("Button A: X+" i128 ", Y+" i128)
-            line("Button B: X+" i128 ", Y+" i128)
-            line("Prize: X=" i128 ", Y=" i128)
-        ))
-        .parse(content)?
-        .into_iter()
-        .map(|(button_a, button_b, prize)| Machine {
-            button_a,
-            button_b,
-            prize,
-        })
-        .collect();
-
-        Ok(Self {
-            machines,
-        })
-    }
 }
 
 fn token_cost(machine: Machine, offset: i128, max_presses: Option<i128>) -> Option<u128> {
@@ -96,23 +53,9 @@ fn total_cost(input: &Input, offset: i128, max_presses: Option<i128>) -> u128 {
         .sum()
 }
 
-#[forbid(unsafe_code)]
-fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    Ok(total_cost(input, 0, Some(100)))
-}
-
-#[forbid(unsafe_code)]
-fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    Ok(total_cost(input, 10_000_000_000_000, None))
-}
-
-#[cfg(test)]
-mod test {
-    use parameterized::parameterized;
-
-    use super::*;
-
-    #[parameterized(input = { r"Button A: X+94, Y+34
+aoc! {
+    #[sample(
+        input = "Button A: X+94, Y+34
 Button B: X+22, Y+67
 Prize: X=8400, Y=5400
 
@@ -126,17 +69,15 @@ Prize: X=7870, Y=6450
 
 Button A: X+69, Y+23
 Button B: X+27, Y+71
-Prize: X=18641, Y=10279" }, expected = { "480" })]
-    fn test_part_1(input: &str, expected: &str) {
-        let input = input.parse().unwrap();
-        let answer = part_one(&input);
-
-        if let Ok(actual) = answer {
-            assert_eq!(actual.to_string(), expected.to_string());
-        }
+Prize: X=18641, Y=10279",
+        expected = "480"
+    )]
+    fn part_one(input @ Input { .. }: &Input) -> impl std::fmt::Display {
+        total_cost(input, 0, Some(100))
     }
 
-    #[parameterized(input = { r"Button A: X+94, Y+34
+    #[sample(
+        input = "Button A: X+94, Y+34
 Button B: X+22, Y+67
 Prize: X=8400, Y=5400
 
@@ -150,13 +91,10 @@ Prize: X=7870, Y=6450
 
 Button A: X+69, Y+23
 Button B: X+27, Y+71
-Prize: X=18641, Y=10279" }, expected = { "875318608908" })]
-    fn test_part_2(input: &str, expected: &str) {
-        let input = input.parse().unwrap();
-        let answer = part_two(&input);
-
-        if let Ok(actual) = answer {
-            assert_eq!(actual.to_string(), expected.to_string());
-        }
+Prize: X=18641, Y=10279",
+        expected = "875318608908"
+    )]
+    fn part_two(input @ Input { .. }: &Input) -> impl std::fmt::Display {
+        total_cost(input, 10_000_000_000_000, None)
     }
 }

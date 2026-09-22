@@ -1,34 +1,8 @@
 use std::collections::HashMap;
 
-use aoc_parse::parser;
-use aoc_parse::prelude::*;
 use itertools::Itertools;
+use macros::{AocInput, aoc};
 use petgraph::unionfind::UnionFind;
-
-fn main() {
-    use std::io::Read;
-
-    let mut input_content = std::fs::File::open("input.txt").expect("No input.txt file");
-    let mut buffer = String::new();
-
-    input_content.read_to_string(&mut buffer).unwrap();
-    let input: Input = buffer.as_str().parse().unwrap();
-
-    let ans1 = part_one(&input);
-    let ans2 = part_two(&input);
-
-    if let Ok(ans1) = ans1 {
-        println!("Result of part 1: {ans1}")
-    } else {
-        println!("Part 1 fails.")
-    }
-
-    if let Ok(ans2) = ans2 {
-        println!("Result of part 2: {ans2}")
-    } else {
-        println!("Part 2 fails.")
-    }
-}
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 struct Point3 {
@@ -45,23 +19,12 @@ impl Point3 {
     }
 }
 
+#[derive(AocInput)]
 struct Input {
-    points: Vec<Point3>,
-}
-
-impl std::str::FromStr for Input {
-    type Err = aoc_parse::ParseError;
-
-    fn from_str(content: &str) -> Result<Self, Self::Err> {
-        let points = parser!(lines(
-            x:isize "," y:isize "," z:isize => Point3 { x, y, z }
-        ))
-        .parse(content)?;
-
-        Ok(Self {
-            points,
-        })
-    }
+    #[parse(lines(
+        x:isize "," y:isize "," z:isize => Point3 { x, y, z }
+    ))]
+    pub(crate) points: Vec<Point3>,
 }
 
 fn sorted_edges(points: &[Point3]) -> Vec<(isize, (usize, usize))> {
@@ -74,52 +37,9 @@ fn sorted_edges(points: &[Point3]) -> Vec<(isize, (usize, usize))> {
         .collect()
 }
 
-#[forbid(unsafe_code)]
-fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    let points = &input.points;
-    let edges = sorted_edges(points);
-    let connection_count = if points.len() == 20 { 10 } else { 1000 };
-    let mut components = UnionFind::new(points.len());
-
-    for &(_, (a, b)) in edges.iter().take(connection_count) {
-        components.union(a, b);
-    }
-
-    let mut component_sizes = HashMap::new();
-    for point in 0..points.len() {
-        *component_sizes.entry(components.find_mut(point)).or_insert(0_usize) += 1;
-    }
-
-    Ok(component_sizes.values().sorted_unstable().rev().take(3).product::<usize>())
-}
-
-#[forbid(unsafe_code)]
-fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    let points = &input.points;
-    let edges = sorted_edges(points);
-    let mut components = UnionFind::new(points.len());
-    let mut component_count = points.len();
-
-    for (_, (a, b)) in edges {
-        if components.union(a, b) {
-            component_count -= 1;
-        }
-
-        if component_count == 1 {
-            return Ok(points[a].x * points[b].x);
-        }
-    }
-
-    unreachable!("all points should eventually be connected")
-}
-
-#[cfg(test)]
-mod test {
-    use parameterized::parameterized;
-
-    use super::*;
-
-    #[parameterized(input = { r"162,817,812
+aoc! {
+    #[sample(
+        input = "162,817,812
 57,618,57
 906,360,560
 592,479,940
@@ -138,17 +58,28 @@ mod test {
 941,993,340
 862,61,35
 984,92,344
-425,690,689" }, expected = { "40" })]
-    fn test_part_1(input: &str, expected: &str) {
-        let input = input.parse().unwrap();
-        let answer = part_one(&input);
+425,690,689",
+        expected = "40"
+    )]
+    fn part_one(Input { points }: &Input) -> impl std::fmt::Display {
+        let edges = sorted_edges(points);
+        let connection_count = if points.len() == 20 { 10 } else { 1000 };
+        let mut components = UnionFind::new(points.len());
 
-        if let Ok(actual) = answer {
-            assert_eq!(actual.to_string(), expected.to_string());
+        for &(_, (a, b)) in edges.iter().take(connection_count) {
+            components.union(a, b);
         }
+
+        let mut component_sizes = HashMap::new();
+        for point in 0..points.len() {
+            *component_sizes.entry(components.find_mut(point)).or_insert(0_usize) += 1;
+        }
+
+        component_sizes.values().sorted_unstable().rev().take(3).product::<usize>()
     }
 
-    #[parameterized(input = { r"162,817,812
+    #[sample(
+        input = "162,817,812
 57,618,57
 906,360,560
 592,479,940
@@ -167,13 +98,24 @@ mod test {
 941,993,340
 862,61,35
 984,92,344
-425,690,689" }, expected = { "25272" })]
-    fn test_part_2(input: &str, expected: &str) {
-        let input = input.parse().unwrap();
-        let answer = part_two(&input);
+425,690,689",
+        expected = "25272"
+    )]
+    fn part_two(Input { points }: &Input) -> impl std::fmt::Display {
+        let edges = sorted_edges(points);
+        let mut components = UnionFind::new(points.len());
+        let mut component_count = points.len();
 
-        if let Ok(actual) = answer {
-            assert_eq!(actual.to_string(), expected.to_string());
+        for (_, (a, b)) in edges {
+            if components.union(a, b) {
+                component_count -= 1;
+            }
+
+            if component_count == 1 {
+                return points[a].x * points[b].x;
+            }
         }
+
+        unreachable!("all points should eventually be connected")
     }
 }

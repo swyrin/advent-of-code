@@ -1,74 +1,35 @@
 use std::collections::HashSet;
 
-fn main() {
-    use std::io::Read;
-
-    let mut input_content = std::fs::File::open("input.txt").expect("No input.txt file");
-    let mut buffer = String::new();
-
-    input_content.read_to_string(&mut buffer).unwrap();
-    let input: Input = buffer.as_str().parse().unwrap();
-
-    let ans1 = part_one(&input);
-    let ans2 = part_two(&input);
-
-    if let Ok(ans1) = ans1 {
-        println!("Result of part 1: {ans1}")
-    } else {
-        println!("Part 1 fails.")
-    }
-
-    if let Ok(ans2) = ans2 {
-        println!("Result of part 2: {ans2}")
-    } else {
-        println!("Part 2 fails.")
-    }
-}
+use macros::{AocInput, aoc};
 
 type Position = (usize, usize);
 
+#[derive(AocInput)]
 struct Input {
-    grid: Vec<Vec<u8>>,
-    start: Position,
+    #[parse(rows:lines(string(any_char+)) => to_grid(rows))]
+    pub(crate) grid: Vec<Vec<u8>>,
 }
 
-impl std::str::FromStr for Input {
-    type Err = String;
-
-    fn from_str(content: &str) -> Result<Self, Self::Err> {
-        let grid = content
-            .lines()
-            .filter(|line| !line.is_empty())
-            .map(str::bytes)
-            .map(|bytes| bytes.collect::<Vec<_>>())
-            .collect::<Vec<_>>();
-
-        let mut start = None;
-        for (row, line) in grid.iter().enumerate() {
-            for (column, &cell) in line.iter().enumerate() {
-                if cell == b'^' {
-                    start = Some((row, column));
-                    break;
-                }
-            }
-
-            if start.is_some() {
-                break;
-            }
-        }
-
-        let Some(start) = start else {
-            return Err("guard map has no starting position".to_string());
-        };
-
-        Ok(Self {
-            grid,
-            start,
-        })
-    }
+fn to_grid(rows: Vec<String>) -> Vec<Vec<u8>> {
+    rows.into_iter()
+        .filter(|line| !line.is_empty())
+        .map(|line| line.bytes().collect::<Vec<_>>())
+        .collect::<Vec<_>>()
 }
 
 impl Input {
+    fn get_start(&self) -> Position {
+        for (row, line) in self.grid.iter().enumerate() {
+            for (column, &cell) in line.iter().enumerate() {
+                if cell == b'^' {
+                    return (row, column);
+                }
+            }
+        }
+
+        panic!("guard map has no starting position");
+    }
+
     fn cell(&self, (row, column): Position) -> Option<u8> {
         self.grid.get(row).and_then(|line| line.get(column)).copied()
     }
@@ -76,7 +37,7 @@ impl Input {
     fn walk(&self, extra_obstacle: Option<Position>) -> (bool, HashSet<Position>) {
         const DIRECTIONS: [(isize, isize); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];
 
-        let mut position = self.start;
+        let mut position = self.get_start();
         let mut direction = 0;
         let mut visited = HashSet::from([position]);
         let mut states = HashSet::from([(position, direction)]);
@@ -107,29 +68,9 @@ impl Input {
     }
 }
 
-#[forbid(unsafe_code)]
-fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    Ok(input.walk(None).1.len())
-}
-
-#[forbid(unsafe_code)]
-fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    Ok(input
-        .walk(None)
-        .1
-        .into_iter()
-        .filter(|&position| position != input.start)
-        .filter(|&position| input.walk(Some(position)).0)
-        .count())
-}
-
-#[cfg(test)]
-mod test {
-    use parameterized::parameterized;
-
-    use super::*;
-
-    #[parameterized(input = { r"....#.....
+aoc! {
+    #[sample(
+        input = "....#.....
 .........#
 ..........
 ..#.......
@@ -138,17 +79,15 @@ mod test {
 .#..^.....
 ........#.
 #.........
-......#..." }, expected = { "41" })]
-    fn test_part_1(input: &str, expected: &str) {
-        let input = input.parse().unwrap();
-        let answer = part_one(&input);
-
-        if let Ok(actual) = answer {
-            assert_eq!(actual.to_string(), expected.to_string());
-        }
+......#...",
+        expected = "41"
+    )]
+    fn part_one(input @ Input { .. }: &Input) -> impl std::fmt::Display {
+        input.walk(None).1.len()
     }
 
-    #[parameterized(input = { r"....#.....
+    #[sample(
+        input = "....#.....
 .........#
 ..........
 ..#.......
@@ -157,13 +96,16 @@ mod test {
 .#..^.....
 ........#.
 #.........
-......#..." }, expected = { "6" })]
-    fn test_part_2(input: &str, expected: &str) {
-        let input = input.parse().unwrap();
-        let answer = part_two(&input);
-
-        if let Ok(actual) = answer {
-            assert_eq!(actual.to_string(), expected.to_string());
-        }
+......#...",
+        expected = "6"
+    )]
+    fn part_two(input @ Input { .. }: &Input) -> impl std::fmt::Display {
+        input
+            .walk(None)
+            .1
+            .into_iter()
+            .filter(|&position| position != input.get_start())
+            .filter(|&position| input.walk(Some(position)).0)
+            .count()
     }
 }

@@ -1,63 +1,45 @@
 use std::collections::HashMap;
 
+use macros::{AocInput, aoc};
 use petgraph::graph::{DiGraph, NodeIndex};
 use petgraph::visit::Bfs;
 
-fn main() {
-    use std::io::Read;
-
-    let mut input_content = std::fs::File::open("input.txt").expect("No input.txt file");
-    let mut buffer = String::new();
-
-    input_content.read_to_string(&mut buffer).unwrap();
-    let input: Input = buffer.as_str().parse().unwrap();
-
-    let ans1 = part_one(&input);
-    let ans2 = part_two(&input);
-
-    if let Ok(ans1) = ans1 {
-        println!("Result of part 1: {ans1}")
-    } else {
-        println!("Part 1 fails.")
-    }
-
-    if let Ok(ans2) = ans2 {
-        println!("Result of part 2: {ans2}")
-    } else {
-        println!("Part 2 fails.")
-    }
-}
-
+#[derive(AocInput)]
 struct Input {
-    graph: DiGraph<u8, ()>,
+    #[parse(rows:lines(string(any_char+)) => to_heights(rows))]
+    heights: Vec<Vec<u8>>,
 }
 
-impl std::str::FromStr for Input {
-    type Err = String;
+fn to_heights(rows: Vec<String>) -> Vec<Vec<u8>> {
+    let heights = rows
+        .into_iter()
+        .filter(|line| !line.is_empty())
+        .map(|line| {
+            line.chars()
+                .map(|height| {
+                    height
+                        .to_digit(10)
+                        .map(|height| height as u8)
+                        .unwrap_or_else(|| panic!("invalid trail height: {height}"))
+                })
+                .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>();
 
-    fn from_str(content: &str) -> Result<Self, Self::Err> {
-        let rows = content
-            .lines()
-            .filter(|line| !line.is_empty())
-            .map(|line| {
-                line.chars()
-                    .map(|height| {
-                        height
-                            .to_digit(10)
-                            .map(|height| height as u8)
-                            .ok_or_else(|| format!("invalid trail height: {height}"))
-                    })
-                    .collect::<Result<Vec<_>, _>>()
-            })
-            .collect::<Result<Vec<_>, _>>()?;
+    if heights.is_empty() {
+        panic!("invalid topographic map: empty");
+    }
 
-        if rows.is_empty() {
-            return Err("invalid topographic map: empty".to_string());
-        }
+    if heights.iter().any(|row| row.len() != heights[0].len()) {
+        panic!("invalid topographic map: ragged rows");
+    }
 
-        if rows.iter().any(|row| row.len() != rows[0].len()) {
-            return Err("invalid topographic map: ragged rows".to_string());
-        }
+    heights
+}
+
+impl Input {
+    fn graph(&self) -> DiGraph<u8, ()> {
+        let rows = &self.heights;
 
         let mut graph = DiGraph::<u8, ()>::new();
         let mut nodes = vec![vec![NodeIndex::new(0); rows[0].len()]; rows.len()];
@@ -98,9 +80,7 @@ impl std::str::FromStr for Input {
             }
         }
 
-        Ok(Self {
-            graph,
-        })
+        graph
     }
 }
 
@@ -123,75 +103,57 @@ fn count_trails(
     count
 }
 
-#[forbid(unsafe_code)]
-fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    let mut total = 0;
+aoc! {
+    #[sample(
+        input = "89010123
+78121874
+87430965
+96549874
+45678903
+32019012
+01329801
+10456732",
+        expected = "36"
+    )]
+    fn part_one(input @ Input { .. }: &Input) -> impl std::fmt::Display {
+        let graph = input.graph();
+        let mut total = 0;
 
-    for trailhead in input.graph.node_indices().filter(|&node| input.graph[node] == 0) {
-        let mut search = Bfs::new(&input.graph, trailhead);
-        let mut count = 0;
+        for trailhead in graph.node_indices().filter(|&node| graph[node] == 0) {
+            let mut search = Bfs::new(&graph, trailhead);
+            let mut count = 0;
 
-        while let Some(node) = search.next(&input.graph) {
-            if input.graph[node] == 9 {
-                count += 1;
+            while let Some(node) = search.next(&graph) {
+                if graph[node] == 9 {
+                    count += 1;
+                }
             }
+
+            total += count;
         }
 
-        total += count;
+        total
     }
 
-    Ok(total)
-}
-
-#[forbid(unsafe_code)]
-fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    let mut memo = HashMap::new();
-
-    Ok(input
-        .graph
-        .node_indices()
-        .filter(|&node| input.graph[node] == 0)
-        .map(|trailhead| count_trails(&input.graph, trailhead, &mut memo))
-        .sum::<u64>())
-}
-
-#[cfg(test)]
-mod test {
-    use parameterized::parameterized;
-
-    use super::*;
-
-    #[parameterized(input = { r"89010123
+    #[sample(
+        input = "89010123
 78121874
 87430965
 96549874
 45678903
 32019012
 01329801
-10456732" }, expected = { "36" })]
-    fn test_part_1(input: &str, expected: &str) {
-        let input = input.parse().unwrap();
-        let answer = part_one(&input);
+10456732",
+        expected = "81"
+    )]
+    fn part_two(input @ Input { .. }: &Input) -> impl std::fmt::Display {
+        let graph = input.graph();
+        let mut memo = HashMap::new();
 
-        if let Ok(actual) = answer {
-            assert_eq!(actual.to_string(), expected.to_string());
-        }
-    }
-
-    #[parameterized(input = { r"89010123
-78121874
-87430965
-96549874
-45678903
-32019012
-01329801
-10456732" }, expected = { "81" })]
-    fn test_part_2(input: &str, expected: &str) {
-        let input = input.parse().unwrap();
-        let answer = part_two(&input);
-
-        if let Ok(actual) = answer {
-            assert_eq!(actual.to_string(), expected.to_string());
-        }
+        graph
+            .node_indices()
+            .filter(|&node| graph[node] == 0)
+            .map(|trailhead| count_trails(&graph, trailhead, &mut memo))
+            .sum::<u64>()
     }
 }

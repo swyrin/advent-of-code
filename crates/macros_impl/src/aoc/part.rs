@@ -45,7 +45,65 @@ pub fn input_type_from_function(function: &ItemFn) -> Result<Type> {
         ));
     };
 
-    Ok((*reference.elem).clone())
+    let ty = (*reference.elem).clone();
+
+    validate_unpacks(&arg.pat, &ty)?;
+
+    Ok(ty)
+}
+
+fn validate_unpacks(pat: &syn::Pat, ty: &Type) -> Result<()> {
+    let struct_pat = match pat {
+        syn::Pat::Struct(pat) => pat,
+
+        syn::Pat::Ident(binding) => match binding.subpat.as_ref() {
+            Some((_, sub)) => match sub.as_ref() {
+                syn::Pat::Struct(pat) => pat,
+
+                _ => {
+                    return Err(unpack_error(&binding.ident));
+                },
+            },
+
+            None => {
+                return Err(unpack_error(&binding.ident));
+            },
+        },
+
+        _ => {
+            return Err(unpack_error(pat));
+        },
+    };
+
+    let ty_name = match ty {
+        syn::Type::Path(path) => match path.path.segments.last() {
+            Some(segment) => segment.ident.to_string(),
+
+            None => {
+                return Err(unpack_error(&struct_pat.path));
+            },
+        },
+
+        _ => {
+            return Err(unpack_error(&struct_pat.path));
+        },
+    };
+
+    match struct_pat.path.segments.last() {
+        Some(segment) if segment.ident == ty_name => Ok(()),
+
+        _ => Err(Error::new_spanned(
+            &struct_pat.path,
+            "part function pattern must name the input type, e.g. `Input { foo }`",
+        )),
+    }
+}
+
+fn unpack_error(tokens: impl quote::ToTokens) -> Error {
+    Error::new_spanned(
+        tokens,
+        "part functions must unpack the input struct, e.g. `Input { foo }: &Input`",
+    )
 }
 
 fn generate_sample_test(
@@ -73,14 +131,7 @@ fn generate_sample_test(
                         )
                     );
 
-            let actual = #function_name(&input)
-                .expect(
-                    concat!(
-                        "Part ",
-                        #part_number,
-                        " returned an error on sample input"
-                    )
-                );
+            let actual = #function_name(&input);
 
             assert_eq!(
                 actual.to_string(),
@@ -112,22 +163,11 @@ pub fn generate_part(
         sample.map(|sample| generate_sample_test(function_name, sample, input_type, part_number));
 
     let run = quote! {
-        match #function_name(&input) {
-            Ok(answer) => {
-                println!(
-                    "Result of part {}: {}",
-                    #part_number,
-                    answer
-                );
-            }
-
-            Err(_) => {
-                println!(
-                    "Part {} fails.",
-                    #part_number
-                );
-            }
-        }
+        println!(
+            "Result of part {}: {}",
+            #part_number,
+            #function_name(&input)
+        );
     };
 
     (

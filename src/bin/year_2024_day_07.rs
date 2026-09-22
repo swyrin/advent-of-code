@@ -1,47 +1,11 @@
 use std::collections::HashSet;
 
-use aoc_parse::parser;
-use aoc_parse::prelude::*;
+use macros::{AocInput, aoc};
 
-fn main() {
-    use std::io::Read;
-
-    let mut input_content = std::fs::File::open("input.txt").expect("No input.txt file");
-    let mut buffer = String::new();
-
-    input_content.read_to_string(&mut buffer).unwrap();
-    let input: Input = buffer.as_str().parse().unwrap();
-
-    let ans1 = part_one(&input);
-    let ans2 = part_two(&input);
-
-    if let Ok(ans1) = ans1 {
-        println!("Result of part 1: {ans1}")
-    } else {
-        println!("Part 1 fails.")
-    }
-
-    if let Ok(ans2) = ans2 {
-        println!("Result of part 2: {ans2}")
-    } else {
-        println!("Part 2 fails.")
-    }
-}
-
+#[derive(AocInput)]
 struct Input {
-    equations: Vec<(u64, Vec<u64>)>,
-}
-
-impl std::str::FromStr for Input {
-    type Err = aoc_parse::ParseError;
-
-    fn from_str(content: &str) -> Result<Self, Self::Err> {
-        let equations = parser!(lines(u64 ": " repeat_sep(u64, " "))).parse(content)?;
-
-        Ok(Self {
-            equations,
-        })
-    }
+    #[parse(lines(u64 ": " repeat_sep(u64, " ")))]
+    pub(crate) equations: Vec<(u64, Vec<u64>)>,
 }
 
 fn concatenate(left: u64, right: u64) -> Option<u64> {
@@ -101,23 +65,9 @@ fn calibration_result(input: &Input, allow_concatenation: bool) -> u128 {
         .sum()
 }
 
-#[forbid(unsafe_code)]
-fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    Ok(calibration_result(input, false))
-}
-
-#[forbid(unsafe_code)]
-fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    Ok(calibration_result(input, true))
-}
-
-#[cfg(test)]
-mod test {
-    use parameterized::parameterized;
-
-    use super::*;
-
-    #[parameterized(input = { r"190: 10 19
+aoc! {
+    #[sample(
+        input = "190: 10 19
 3267: 81 40 27
 83: 17 5
 156: 15 6
@@ -125,17 +75,15 @@ mod test {
 161011: 16 10 13
 192: 17 8 14
 21037: 9 7 18 13
-292: 11 6 16 20" }, expected = { "3749" })]
-    fn test_part_1(input: &str, expected: &str) {
-        let input = input.parse().unwrap();
-        let answer = part_one(&input);
-
-        if let Ok(actual) = answer {
-            assert_eq!(actual.to_string(), expected.to_string());
-        }
+292: 11 6 16 20",
+        expected = "3749"
+    )]
+    fn part_one(input @ Input { .. }: &Input) -> impl std::fmt::Display {
+        calibration_result(input, false)
     }
 
-    #[parameterized(input = { r"190: 10 19
+    #[sample(
+        input = "190: 10 19
 3267: 81 40 27
 83: 17 5
 156: 15 6
@@ -143,13 +91,10 @@ mod test {
 161011: 16 10 13
 192: 17 8 14
 21037: 9 7 18 13
-292: 11 6 16 20" }, expected = { "11387" })]
-    fn test_part_2(input: &str, expected: &str) {
-        let input = input.parse().unwrap();
-        let answer = part_two(&input);
-
-        if let Ok(actual) = answer {
-            assert_eq!(actual.to_string(), expected.to_string());
-        }
+292: 11 6 16 20",
+        expected = "11387"
+    )]
+    fn part_two(input @ Input { .. }: &Input) -> impl std::fmt::Display {
+        calibration_result(input, true)
     }
 }

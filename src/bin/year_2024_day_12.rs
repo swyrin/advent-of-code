@@ -1,59 +1,31 @@
 use std::collections::HashSet;
 
-fn main() {
-    use std::io::Read;
-
-    let mut input_content = std::fs::File::open("input.txt").expect("No input.txt file");
-    let mut buffer = String::new();
-
-    input_content.read_to_string(&mut buffer).unwrap();
-    let input: Input = buffer.as_str().parse().unwrap();
-
-    let ans1 = part_one(&input);
-    let ans2 = part_two(&input);
-
-    if let Ok(ans1) = ans1 {
-        println!("Result of part 1: {ans1}")
-    } else {
-        println!("Part 1 fails.")
-    }
-
-    if let Ok(ans2) = ans2 {
-        println!("Result of part 2: {ans2}")
-    } else {
-        println!("Part 2 fails.")
-    }
-}
+use macros::{AocInput, aoc};
 
 type Position = (isize, isize);
 
+#[derive(AocInput)]
 struct Input {
+    #[parse(rows:lines(string(any_char+)) => to_garden(rows))]
     garden: Vec<Vec<u8>>,
 }
 
-impl std::str::FromStr for Input {
-    type Err = String;
+fn to_garden(rows: Vec<String>) -> Vec<Vec<u8>> {
+    let garden = rows
+        .into_iter()
+        .filter(|line| !line.is_empty())
+        .map(|line| line.bytes().collect::<Vec<_>>())
+        .collect::<Vec<_>>();
 
-    fn from_str(content: &str) -> Result<Self, Self::Err> {
-        let garden = content
-            .lines()
-            .filter(|line| !line.is_empty())
-            .map(str::bytes)
-            .map(|bytes| bytes.collect::<Vec<_>>())
-            .collect::<Vec<_>>();
-
-        if garden.is_empty() {
-            return Err("invalid garden map: empty".to_string());
-        }
-
-        if garden.iter().any(|row| row.len() != garden[0].len()) {
-            return Err("invalid garden map: ragged rows".to_string());
-        }
-
-        Ok(Self {
-            garden,
-        })
+    if garden.is_empty() {
+        panic!("invalid garden map: empty");
     }
+
+    if garden.iter().any(|row| row.len() != garden[0].len()) {
+        panic!("invalid garden map: ragged rows");
+    }
+
+    garden
 }
 
 impl Input {
@@ -140,23 +112,9 @@ fn side_count(region: &HashSet<Position>) -> usize {
         .sum()
 }
 
-#[forbid(unsafe_code)]
-fn part_one(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    Ok(input.regions().into_iter().map(|region| region.len() * perimeter(&region)).sum::<usize>())
-}
-
-#[forbid(unsafe_code)]
-fn part_two(input: &Input) -> anyhow::Result<impl std::fmt::Display> {
-    Ok(input.regions().into_iter().map(|region| region.len() * side_count(&region)).sum::<usize>())
-}
-
-#[cfg(test)]
-mod test {
-    use parameterized::parameterized;
-
-    use super::*;
-
-    #[parameterized(input = { r"RRRRIICCFF
+aoc! {
+    #[sample(
+        input = "RRRRIICCFF
 RRRRIICCCF
 VVRRRCCFFF
 VVRCCCJFFF
@@ -165,17 +123,15 @@ VVIVCCJJEE
 VVIIICJJEE
 MIIIIIJJEE
 MIIISIJEEE
-MMMISSJEEE" }, expected = { "1930" })]
-    fn test_part_1(input: &str, expected: &str) {
-        let input = input.parse().unwrap();
-        let answer = part_one(&input);
-
-        if let Ok(actual) = answer {
-            assert_eq!(actual.to_string(), expected.to_string());
-        }
+MMMISSJEEE",
+        expected = "1930"
+    )]
+    fn part_one(input @ Input { .. }: &Input) -> impl std::fmt::Display {
+        input.regions().into_iter().map(|region| region.len() * perimeter(&region)).sum::<usize>()
     }
 
-    #[parameterized(input = { r"RRRRIICCFF
+    #[sample(
+        input = "RRRRIICCFF
 RRRRIICCCF
 VVRRRCCFFF
 VVRCCCJFFF
@@ -184,13 +140,10 @@ VVIVCCJJEE
 VVIIICJJEE
 MIIIIIJJEE
 MIIISIJEEE
-MMMISSJEEE" }, expected = { "1206" })]
-    fn test_part_2(input: &str, expected: &str) {
-        let input = input.parse().unwrap();
-        let answer = part_two(&input);
-
-        if let Ok(actual) = answer {
-            assert_eq!(actual.to_string(), expected.to_string());
-        }
+MMMISSJEEE",
+        expected = "1206"
+    )]
+    fn part_two(input @ Input { .. }: &Input) -> impl std::fmt::Display {
+        input.regions().into_iter().map(|region| region.len() * side_count(&region)).sum::<usize>()
     }
 }
