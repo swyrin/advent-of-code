@@ -33,3 +33,7 @@ macros = { workspace = true }
 
 [dev-dependencies]
 parameterized = "2.1.0"
+
+[lints.cargo]
+# https://github.com/rust-lang/cargo/issues/17449#issuecomment-5577945337
+non_kebab_case_bins = "allow"
