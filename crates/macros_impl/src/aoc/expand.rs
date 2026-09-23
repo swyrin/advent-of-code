@@ -121,6 +121,25 @@ mod tests {
     }
 
     #[test]
+    fn extra_param_errors() {
+        let out = expand(quote! {
+            #[sample(input = "1", expected = "1")]
+            fn part_one(input: &Input, extra: u32) -> impl std::fmt::Display {
+                input.n
+            }
+
+            #[sample(input = "2", expected = "2")]
+            fn part_two(input: &Input) -> impl std::fmt::Display {
+                input.n
+            }
+        })
+        .to_string();
+
+        assert!(out.contains("compile_error"));
+        assert!(!out.contains("sample_0"));
+    }
+
+    #[test]
     fn broken_syntax_keeps_both_functions_verbatim() {
         let out = expand(quote! {
             #[sample(input = "1", expected = "1")]

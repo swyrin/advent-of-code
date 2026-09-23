@@ -24,6 +24,13 @@ pub fn extract_part(functions: &mut Vec<ItemFn>, name: &str) -> syn::Result<Opti
 }
 
 pub fn input_type_from_function(function: &ItemFn) -> syn::Result<Type> {
+    if function.sig.inputs.len() != 1 {
+        return Err(Error::new_spanned(
+            &function.sig,
+            "part function must take only the input, e.g. `&Input`",
+        ));
+    }
+
     let Some(first_arg) = function.sig.inputs.first() else {
         return Err(Error::new_spanned(
             &function.sig,
