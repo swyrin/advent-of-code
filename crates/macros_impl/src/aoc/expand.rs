@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use proc_macro2::{Delimiter, TokenTree};
 use quote::quote;
-use syn::{Error, ItemFn, Result};
+use syn::{Error, ItemFn, Result, Type};
 
 use crate::aoc::parser::AocInput;
 use crate::aoc::part::{Part, extract_part, generate_part, input_type_from_function};
@@ -44,10 +44,13 @@ fn expand_impl(mut input: AocInput) -> Result<proc_macro2::TokenStream> {
 
     let functions = &input.functions;
 
+    let from_str_assert = assert_input_from_str(&input_type);
+
     Ok(quote! {
         #(#functions)*
         #part_one_code
         #part_two_code
+        #from_str_assert
 
         fn main() {
             let input_content =
@@ -63,6 +66,19 @@ fn expand_impl(mut input: AocInput) -> Result<proc_macro2::TokenStream> {
             #part_two_run
         }
     })
+}
+
+fn assert_input_from_str(input_type: &Type) -> proc_macro2::TokenStream {
+    quote! {
+        const _: fn() = || {
+            fn assert_from_str<T: ::std::str::FromStr>()
+            where
+                T::Err: ::std::fmt::Debug,
+            {
+            }
+            assert_from_str::<#input_type>();
+        };
+    }
 }
 
 fn fallback_verbatim(raw: proc_macro2::TokenStream, error: Error) -> proc_macro2::TokenStream {
@@ -266,11 +282,13 @@ fn recover(raw: proc_macro2::TokenStream, parse_error: Error) -> proc_macro2::To
         Some(input_type) => {
             let (part_one_code, part_one_run) = generate_part(part_one, &input_type, 1);
             let (part_two_code, part_two_run) = generate_part(part_two, &input_type, 2);
+            let from_str_assert = assert_input_from_str(&input_type);
 
             quote! {
                 #(#functions)*
                 #part_one_code
                 #part_two_code
+                #from_str_assert
                 #(#broken)*
 
                 fn main() {

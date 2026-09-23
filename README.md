@@ -31,16 +31,17 @@ struct Input {
 }
 ```
 
-Constraints:
-
-- Struct fields are parsed like the order shown in struct.
-- Struct with multiple fields must have their fields be either `#[parse(section(...))]` or `#[parse(sections(...))]`
-    - There exists `#[trust_me]` as the "I know what I am doing."
-
 (powered by [`aoc_parse`](https://lib.rs/crates/aoc-parse), so give them a praise)
 
 (yes, the APIs are inspired by the glorious [`serde`](https://lib.rs/crates/serde))
 
+### Constraints
+
+- Struct fields are parsed like the order shown in struct.
+- Struct with multiple fields must have their fields be either `#[parse(section(...))]` or `#[parse(sections(...))]`
+    - There exists `#[trust_me]` to make `syn` STFU.
+
+> [!WARNING]
 > The implementation of this one is VERY ATROCIOUS since AoC input varies a lot, so everything in this macro is just
 > whack-a-mole game.
 >
@@ -54,30 +55,22 @@ You may want to use `aoc!` macro to reduce the boilerplate of having to define `
 with input reading and writing personalized results every time.
 
 This one accepts two functions only with the name of `part_one` and `part_two`, and will
-throw if there is none. And I enforce the unpacking of struct field (s). I love Rust.
+complain if there is none. And the unpacking of struct fields is enforced since I had better
+coding ergonomics with it.
 
-(Shit design, I know)
+To provide a sample input, simply put `#[sample(input, expected)]` on top of the part function.
 
-> Due to my laziness to install [`num_traits`](https://lib.rs/crates/num-traits) crate, `part_{one,two}` must
-> return `impl std::fmt::Display`
-
-```rust
-aoc! {
-    fn part_one(Input { .. }: &Input) -> impl std::fmt::Display {}    
-}
-```
-
-### Test definition: `#[sample]` attribute macro
-
-- Yes, I don't want to use `#[parametrize]` just for ONE test.
-- Contrary of other atrocious candidates, this one is... very simple.
-
-```rust
-#[sample(input = "a", expected = "b")]
-fn part_one() -> impl std::fmt::Display {}
-```
-
-- To the least of surprises:
-    - `input` is `&str`, as `AocInput` employs [`impl FromStr`](https://doc.rust-lang.org/std/str/trait.FromStr.html)
-      for this.
-    - `expected` is `impl std::fmt::Display` due to the return of `part` functions.
+> [!TIP]
+> The functions `part_{one,two}` must:
+>  - Accept a struct with [`std::str::FromStr`](https://doc.rust-lang.org/std/str/trait.FromStr.html) as supertrait.
+>    - Same for `input` in `#[sample]`
+>
+>  - Return data with [`std::fmt::Display`](https://doc.rust-lang.org/std/fmt/trait.Display.html) as supertrait.
+>    - Same for `expected` in `#[sample]`
+>
+> ```rust
+> aoc! {
+>    #[sample(input = "a", expected = "b")]
+>    fn part_one(Input { .. }: &Input) -> impl std::fmt::Display {}    
+> }
+> ``` 
