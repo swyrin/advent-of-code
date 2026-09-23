@@ -53,9 +53,7 @@ struct Input {
 You may want to use `aoc!` macro to reduce the boilerplate of having to define `fn main()`
 with input reading and writing personalized results every time.
 
-This one accepts two functions only with the name of `part_one` and `part_two`, and will
-complain if there is none. And the unpacking of struct fields is enforced since I had better
-coding ergonomics with it.
+This one accepts two functions only with the name of `part_one` and `part_two`.
 
 To provide a sample input, simply put `#[sample(input, expected)]` on top of the part function.
 

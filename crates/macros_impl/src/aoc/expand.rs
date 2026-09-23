@@ -100,6 +100,27 @@ mod tests {
     }
 
     #[test]
+    fn bare_input_without_unpack_works() {
+        let out = expand(quote! {
+            #[sample(input = "1", expected = "1")]
+            fn part_one(input: &Input) -> impl std::fmt::Display {
+                input.n
+            }
+
+            #[sample(input = "2", expected = "2")]
+            fn part_two(input: &Input) -> impl std::fmt::Display {
+                input.n
+            }
+        })
+        .to_string();
+
+        assert!(out.contains("part_1_sample_0"));
+        assert!(out.contains("part_2_sample_0"));
+        assert!(!out.contains("compile_error"));
+        assert!(!out.contains("todo"));
+    }
+
+    #[test]
     fn broken_syntax_keeps_both_functions_verbatim() {
         let out = expand(quote! {
             #[sample(input = "1", expected = "1")]
