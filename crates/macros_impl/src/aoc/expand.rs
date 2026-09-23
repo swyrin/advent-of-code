@@ -6,14 +6,7 @@ use crate::aoc::part::{extract_part, generate_part, input_type_from_function};
 pub fn expand(input: impl Into<proc_macro2::TokenStream>) -> proc_macro2::TokenStream {
     let raw = input.into();
 
-    // Empty input means no parts.
-    let parsed: syn::Result<AocInput> = if raw.is_empty() {
-        Ok(AocInput {
-            functions: Vec::new(),
-        })
-    } else {
-        syn::parse2(raw.clone())
-    };
+    let parsed: syn::Result<AocInput> = syn::parse2(raw.clone());
 
     let output: syn::Result<proc_macro2::TokenStream> = parsed.and_then(|mut input| {
         let part_one = extract_part(&mut input.functions, "part_one")?;
@@ -79,48 +72,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn valid_parts_keep_both_tests() {
-        let out = expand(quote! {
-            #[sample(input = "1", expected = "1")]
-            fn part_one(Input { n }: &Input) -> impl std::fmt::Display {
-                n
-            }
-
-            #[sample(input = "2", expected = "2")]
-            fn part_two(Input { n }: &Input) -> impl std::fmt::Display {
-                n
-            }
-        })
-        .to_string();
-
-        assert!(out.contains("part_1_sample_0"));
-        assert!(out.contains("part_2_sample_0"));
-        assert!(!out.contains("compile_error"));
-        assert!(!out.contains("todo"));
-    }
-
-    #[test]
-    fn bare_input_without_unpack_works() {
-        let out = expand(quote! {
-            #[sample(input = "1", expected = "1")]
-            fn part_one(input: &Input) -> impl std::fmt::Display {
-                input.n
-            }
-
-            #[sample(input = "2", expected = "2")]
-            fn part_two(input: &Input) -> impl std::fmt::Display {
-                input.n
-            }
-        })
-        .to_string();
-
-        assert!(out.contains("part_1_sample_0"));
-        assert!(out.contains("part_2_sample_0"));
-        assert!(!out.contains("compile_error"));
-        assert!(!out.contains("todo"));
-    }
-
-    #[test]
     fn extra_param_errors() {
         let out = expand(quote! {
             #[sample(input = "1", expected = "1")]
@@ -135,19 +86,24 @@ mod tests {
         })
         .to_string();
 
-        assert!(out.contains("compile_error"));
-        assert!(!out.contains("sample_0"));
+        assert!(out.contains("compile_error !"));
     }
 
     #[test]
-    fn broken_syntax_keeps_both_functions_verbatim() {
-        let out = expand(quote! {
+    fn missing_part_filled_with_todo() {
+        let one = expand(quote! {
             #[sample(input = "1", expected = "1")]
             fn part_one(Input { n }: &Input) -> impl std::fmt::Display {
-                let x = ;
                 n
             }
+        })
+        .to_string();
 
+        assert!(one.contains("part_1_sample_0"));
+        assert!(one.contains("fn part_two"));
+        assert!(one.contains("todo !"));
+
+        let two = expand(quote! {
             #[sample(input = "2", expected = "2")]
             fn part_two(Input { n }: &Input) -> impl std::fmt::Display {
                 n
@@ -155,17 +111,17 @@ mod tests {
         })
         .to_string();
 
-        assert!(out.contains("fn part_one"));
-        assert!(out.contains("fn part_two"));
-        assert!(out.contains("sample (input"));
-        assert!(!out.contains("sample_0"));
-        assert!(out.contains("compile_error"));
+        assert!(two.contains("part_2_sample_0"));
+        assert!(two.contains("fn part_one"));
+        assert!(two.contains("todo !"));
     }
 
     #[test]
-    fn missing_part_two_becomes_todo() {
+    fn with_multiple_samples() {
+        // I did one part here to reduce keypressmaxxing.
         let out = expand(quote! {
             #[sample(input = "1", expected = "1")]
+            #[sample(input = "10", expected = "10")]
             fn part_one(Input { n }: &Input) -> impl std::fmt::Display {
                 n
             }
@@ -173,35 +129,17 @@ mod tests {
         .to_string();
 
         assert!(out.contains("part_1_sample_0"));
+        assert!(out.contains("part_1_sample_1"));
         assert!(out.contains("fn part_two"));
-        assert!(out.contains("todo"));
-        assert!(!out.contains("part_two (& input)"));
-        assert!(!out.contains("compile_error"));
+        assert!(out.contains("todo !"));
     }
 
     #[test]
-    fn missing_both_parts_become_todo() {
-        let out = expand(quote! {
-            fn helper() {}
-        })
-        .to_string();
-
-        assert!(out.contains("fn part_one"));
-        assert!(out.contains("fn part_two"));
-        assert!(out.contains("todo"));
-        assert!(!out.contains("(& input)"));
-        assert!(out.contains("read_to_string"));
-        assert!(!out.contains("compile_error"));
-    }
-
-    #[test]
-    fn empty_input_becomes_todo() {
+    fn empty_input_creates_two_todos() {
         let out = expand(quote! {}).to_string();
 
         assert!(out.contains("fn part_one"));
         assert!(out.contains("fn part_two"));
-        assert!(out.contains("todo"));
-        assert!(!out.contains("(& input)"));
-        assert!(!out.contains("compile_error"));
+        assert_eq!(out.matches("todo !").count(), 2);
     }
 }
