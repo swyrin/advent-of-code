@@ -3,8 +3,7 @@ use swiss_knife::common::math::linalg::transpose2;
 
 #[derive(AocInput)]
 struct Input {
-    #[parse(line(repeat_sep(i32, ",")))]
-    #[trust_me]
+    #[parse(section(line(repeat_sep(i32, ","))))]
     pub(crate) calls: Vec<i32>,
     #[parse(
         number = " " * n:i32 => n,

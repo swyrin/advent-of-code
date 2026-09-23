@@ -16,7 +16,6 @@ pub fn expand(input: TokenStream) -> TokenStream {
 struct FieldSpec {
     name: syn::Ident,
     ty: syn::Type,
-    trusted: bool,
 }
 
 fn expand_impl(input: DeriveInput) -> Result<proc_macro2::TokenStream> {
@@ -26,13 +25,6 @@ fn expand_impl(input: DeriveInput) -> Result<proc_macro2::TokenStream> {
         return Err(Error::new_spanned(
             attr,
             "`#[parse(...)]` belongs on the fields of an `AocInput` struct, not on the struct",
-        ));
-    }
-
-    if let Some(attr) = input.attrs.iter().find(|attr| attr.path().is_ident("trust_me")) {
-        return Err(Error::new_spanned(
-            attr,
-            "`#[trust_me]` belongs on the fields of an `AocInput` struct, not on the struct",
         ));
     }
 
@@ -72,31 +64,29 @@ fn expand_impl(input: DeriveInput) -> Result<proc_macro2::TokenStream> {
             .find(|attr| attr.path().is_ident("parse"))
             .ok_or_else(|| Error::new_spanned(field, "missing `#[parse(...)]` attribute"))?;
 
+        if let Some(attr) = field.attrs.iter().find(|attr| attr.path().is_ident("trust_me")) {
+            return Err(Error::new_spanned(
+                attr,
+                "`#[trust_me]` has been removed; wrap the parser with `section(...)` instead",
+            ));
+        }
+
         specs.push((
             FieldSpec {
                 name,
                 ty,
-                trusted: field.attrs.iter().any(|attr| attr.path().is_ident("trust_me")),
             },
             ParseSpec::parse(parse_attr)?,
         ));
     }
 
-    if specs.len() == 1 && specs[0].0.trusted {
-        return Err(Error::new_spanned(
-            &fields[0],
-            "`#[trust_me]` is only meaningful on fields of a multi-field `AocInput` struct",
-        ));
-    }
-
     if specs.len() > 1 {
-        for (index, (field, spec)) in specs.iter().enumerate() {
-            if !field.trusted && !spec.uses_sections() {
+        for (index, (_, spec)) in specs.iter().enumerate() {
+            if !spec.uses_sections() {
                 return Err(Error::new_spanned(
                     &fields[index],
                     "in a multi-field `AocInput` struct, \
-                     each field's parser must use `section` or `sections`; \
-                     add `#[trust_me]` if you know what you're doing",
+                     each field's parser must use `section` or `sections`",
                 ));
             }
         }

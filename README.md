@@ -39,7 +39,6 @@ struct Input {
 
 - Struct fields are parsed like the order shown in struct.
 - Struct with multiple fields must have their fields be either `#[parse(section(...))]` or `#[parse(sections(...))]`
-    - There exists `#[trust_me]` to make `syn` STFU.
 
 > [!WARNING]
 > The implementation of this one is VERY ATROCIOUS since AoC input varies a lot, so everything in this macro is just

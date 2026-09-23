@@ -8,7 +8,7 @@ pub fn aoc(input: TokenStream) -> TokenStream {
     aoc::expand::expand(input)
 }
 
-#[proc_macro_derive(AocInput, attributes(parse, trust_me))]
+#[proc_macro_derive(AocInput, attributes(parse))]
 pub fn aoc_input(input: TokenStream) -> TokenStream {
     input::expand::expand(input)
 }
