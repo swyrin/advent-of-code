@@ -91,8 +91,4 @@ aoc! {
             })
             .count()
     }
-
-    fn part_two(Input { .. }: &Input) -> impl std::fmt::Display {
-        42
-    }
 }
