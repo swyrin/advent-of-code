@@ -1,5 +1,5 @@
 use syn::parse::{Parse, ParseStream};
-use syn::{Error, ItemFn, Result};
+use syn::{ItemFn, Result};
 
 pub struct AocInput {
     pub functions: Vec<ItemFn>,
@@ -11,10 +11,6 @@ impl Parse for AocInput {
 
         while !input.is_empty() {
             functions.push(input.parse::<ItemFn>()?);
-        }
-
-        if functions.is_empty() {
-            return Err(Error::new(input.span(), "expected at least one part function"));
         }
 
         Ok(Self {

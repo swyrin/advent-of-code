@@ -55,17 +55,15 @@ impl Parse for Sample {
 
 pub fn extract_samples(attrs: &mut Vec<Attribute>) -> Result<Vec<Sample>> {
     let mut samples = Vec::new();
-    let mut remaining = Vec::new();
 
-    for attr in attrs.drain(..) {
+    for attr in attrs.iter() {
         if attr.path().is_ident("sample") {
             samples.push(attr.parse_args::<Sample>()?);
-        } else {
-            remaining.push(attr);
         }
     }
 
-    *attrs = remaining;
+    // Only removes attributes on success.
+    attrs.retain(|attr| !attr.path().is_ident("sample"));
 
     Ok(samples)
 }

@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{Error, ItemFn, Result, Type};
+use syn::{Error, Ident, ItemFn, Type};
 
 use crate::aoc::sample::{Sample, extract_samples};
 
@@ -9,7 +9,7 @@ pub struct Part {
     pub samples: Vec<Sample>,
 }
 
-pub fn extract_part(functions: &mut Vec<ItemFn>, name: &str) -> Result<Option<Part>> {
+pub fn extract_part(functions: &mut Vec<ItemFn>, name: &str) -> syn::Result<Option<Part>> {
     let Some(index) = functions.iter().position(|function| function.sig.ident == name) else {
         return Ok(None);
     };
@@ -23,7 +23,7 @@ pub fn extract_part(functions: &mut Vec<ItemFn>, name: &str) -> Result<Option<Pa
     }))
 }
 
-pub fn input_type_from_function(function: &ItemFn) -> Result<Type> {
+pub fn input_type_from_function(function: &ItemFn) -> syn::Result<Type> {
     let Some(first_arg) = function.sig.inputs.first() else {
         return Err(Error::new_spanned(
             &function.sig,
@@ -52,7 +52,7 @@ pub fn input_type_from_function(function: &ItemFn) -> Result<Type> {
     Ok(ty)
 }
 
-fn validate_unpacks(pat: &syn::Pat, ty: &Type) -> Result<()> {
+fn validate_unpacks(pat: &syn::Pat, ty: &Type) -> syn::Result<()> {
     let struct_pat = match pat {
         syn::Pat::Struct(pat) => pat,
 
@@ -106,6 +106,60 @@ fn unpack_error(tokens: impl quote::ToTokens) -> Error {
     )
 }
 
+pub fn generate_part(
+    part: Option<Part>,
+    input_type: Option<&Type>,
+    part_number: u8,
+    name: &str,
+) -> (TokenStream, TokenStream) {
+    let (Some(part), Some(input_type)) = (part, input_type) else {
+        let ident = Ident::new(name, proc_macro2::Span::call_site());
+        let message = format!("aoc!: `{name}` is not defined");
+
+        return (
+            quote! {
+                #[forbid(unsafe_code)]
+                fn #ident() -> impl std::fmt::Display {
+                    todo!(#message)
+                }
+            },
+            quote! {},
+        );
+    };
+
+    let Part {
+        function,
+        samples,
+    } = part;
+
+    let function_name = &function.sig.ident;
+
+    let tests = samples
+        .into_iter()
+        .enumerate()
+        .map(|(index, sample)| {
+            generate_sample_test(function_name, sample, input_type, part_number, index)
+        })
+        .collect::<Vec<_>>();
+
+    let run = quote! {
+        println!(
+            "Result of part {}: {}",
+            #part_number,
+            #function_name(&input)
+        );
+    };
+
+    (
+        quote! {
+            #[forbid(unsafe_code)]
+            #function
+            #(#tests)*
+        },
+        run,
+    )
+}
+
 fn generate_sample_test(
     function_name: &syn::Ident,
     sample: Sample,
@@ -144,46 +198,4 @@ fn generate_sample_test(
             );
         }
     }
-}
-
-pub fn generate_part(
-    part: Option<Part>,
-    input_type: &Type,
-    part_number: u8,
-) -> (TokenStream, TokenStream) {
-    let Some(part) = part else {
-        return (quote! {}, quote! {});
-    };
-
-    let Part {
-        function,
-        samples,
-    } = part;
-
-    let function_name = &function.sig.ident;
-
-    let tests = samples
-        .into_iter()
-        .enumerate()
-        .map(|(index, sample)| {
-            generate_sample_test(function_name, sample, input_type, part_number, index)
-        })
-        .collect::<Vec<_>>();
-
-    let run = quote! {
-        println!(
-            "Result of part {}: {}",
-            #part_number,
-            #function_name(&input)
-        );
-    };
-
-    (
-        quote! {
-            #[forbid(unsafe_code)]
-            #function
-            #(#tests)*
-        },
-        run,
-    )
 }
