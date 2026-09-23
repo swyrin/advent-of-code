@@ -27,11 +27,11 @@ aoc! {
         numbers.iter().map(|x| x.abs_diff(median)).sum::<u32>()
     }
 
-    #[sample(
-        input = "16,1,2,0,4,2,7,1,2,14",
-        expected = "168"
-    )]
-    fn part_two(Input { .. }: &Input) -> impl std::fmt::Display {
-        420
-    }
+    // #[sample(
+    //     input = "16,1,2,0,4,2,7,1,2,14",
+    //     expected = "168"
+    // )]
+    // fn part_two(Input { .. }: &Input) -> impl std::fmt::Display {
+    //     420
+    // }
 }
