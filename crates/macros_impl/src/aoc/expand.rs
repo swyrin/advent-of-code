@@ -5,7 +5,7 @@ use syn::{Error, ItemFn, Result, Type};
 
 use crate::aoc::parser::AocInput;
 use crate::aoc::part::{Part, extract_part, generate_part, input_type_from_function};
-use crate::aoc::sample::extract_sample;
+use crate::aoc::sample::extract_samples;
 
 pub fn expand(input: TokenStream) -> TokenStream {
     let raw: proc_macro2::TokenStream = input.clone().into();
@@ -172,10 +172,10 @@ fn extract_part_tolerant(
 
     let mut function = functions.remove(index);
 
-    match extract_sample(&mut function.attrs) {
-        Ok(sample) => Some(Part {
+    match extract_samples(&mut function.attrs) {
+        Ok(samples) => Some(Part {
             function,
-            sample,
+            samples,
         }),
 
         Err(error) => {

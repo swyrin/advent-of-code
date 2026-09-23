@@ -2,11 +2,11 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{Error, ItemFn, Result, Type};
 
-use crate::aoc::sample::{Sample, extract_sample};
+use crate::aoc::sample::{Sample, extract_samples};
 
 pub struct Part {
     pub function: ItemFn,
-    pub sample: Option<Sample>,
+    pub samples: Vec<Sample>,
 }
 
 pub fn extract_part(functions: &mut Vec<ItemFn>, name: &str) -> Result<Option<Part>> {
@@ -15,11 +15,11 @@ pub fn extract_part(functions: &mut Vec<ItemFn>, name: &str) -> Result<Option<Pa
     };
 
     let mut function = functions.remove(index);
-    let sample = extract_sample(&mut function.attrs)?;
+    let samples = extract_samples(&mut function.attrs)?;
 
     Ok(Some(Part {
         function,
-        sample,
+        samples,
     }))
 }
 
@@ -111,12 +111,15 @@ fn generate_sample_test(
     sample: Sample,
     input_type: &Type,
     part_number: u8,
+    sample_index: usize,
 ) -> TokenStream {
     let sample_input = sample.input;
     let expected = sample.expected;
 
-    let test_name =
-        syn::Ident::new(&format!("part_{part_number}_sample"), proc_macro2::Span::call_site());
+    let test_name = syn::Ident::new(
+        &format!("part_{part_number}_sample_{sample_index}"),
+        proc_macro2::Span::call_site(),
+    );
 
     quote! {
         #[test]
@@ -154,13 +157,18 @@ pub fn generate_part(
 
     let Part {
         function,
-        sample,
+        samples,
     } = part;
 
     let function_name = &function.sig.ident;
 
-    let test =
-        sample.map(|sample| generate_sample_test(function_name, sample, input_type, part_number));
+    let tests = samples
+        .into_iter()
+        .enumerate()
+        .map(|(index, sample)| {
+            generate_sample_test(function_name, sample, input_type, part_number, index)
+        })
+        .collect::<Vec<_>>();
 
     let run = quote! {
         println!(
@@ -174,7 +182,7 @@ pub fn generate_part(
         quote! {
             #[forbid(unsafe_code)]
             #function
-            #test
+            #(#tests)*
         },
         run,
     )

@@ -53,17 +53,13 @@ impl Parse for Sample {
     }
 }
 
-pub fn extract_sample(attrs: &mut Vec<Attribute>) -> Result<Option<Sample>> {
-    let mut sample = None;
+pub fn extract_samples(attrs: &mut Vec<Attribute>) -> Result<Vec<Sample>> {
+    let mut samples = Vec::new();
     let mut remaining = Vec::new();
 
     for attr in attrs.drain(..) {
         if attr.path().is_ident("sample") {
-            if sample.is_some() {
-                return Err(Error::new_spanned(attr, "only one `#[sample(...)]` is allowed"));
-            }
-
-            sample = Some(attr.parse_args::<Sample>()?);
+            samples.push(attr.parse_args::<Sample>()?);
         } else {
             remaining.push(attr);
         }
@@ -71,5 +67,5 @@ pub fn extract_sample(attrs: &mut Vec<Attribute>) -> Result<Option<Sample>> {
 
     *attrs = remaining;
 
-    Ok(sample)
+    Ok(samples)
 }
