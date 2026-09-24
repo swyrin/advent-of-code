@@ -41,11 +41,10 @@ pub fn expand(input: impl Into<proc_macro2::TokenStream>) -> proc_macro2::TokenS
         for field in &fields {
             let name = field.ident.as_ref().unwrap().clone();
 
-            let parse_attr = field
-                .attrs
-                .iter()
-                .find(|attr| attr.path().is_ident("parse"))
-                .ok_or_else(|| Error::new_spanned(field, "missing `#[parse(...)]` attribute"))?;
+            let parse_attr =
+                field.attrs.iter().find(|attr| attr.path().is_ident("parse")).ok_or_else(|| {
+                    Error::new_spanned(field, "missing `#[parse(...)]` attribute")
+                })?;
 
             specs.push((name, ParseSpec::parse(parse_attr)?));
         }
