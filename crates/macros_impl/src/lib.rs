@@ -10,5 +10,5 @@ pub fn aoc(input: TokenStream) -> TokenStream {
 
 #[proc_macro_derive(AocInput, attributes(parse))]
 pub fn aoc_input(input: TokenStream) -> TokenStream {
-    input::expand::expand(input)
+    input::expand::expand(input).into()
 }

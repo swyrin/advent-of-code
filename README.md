@@ -38,15 +38,12 @@ struct Input {
 ### Constraints
 
 - Struct fields are parsed like the order shown in struct.
-- Struct with multiple fields must have their fields be either `#[parse(section(...))]` or `#[parse(sections(...))]`
 
 > [!WARNING]
 > The implementation of this one is VERY ATROCIOUS since AoC input varies a lot, so everything in this macro is just
 > whack-a-mole game.
 >
-> If the thing doesn't work, perform [`impl std::str::FromStr`](https://doc.rust-lang.org/std/str/trait.FromStr.html),
-> slap a `#[derive(Debug, Clone)]` since that is what `#[derive(AocInput)]` derive do for you - plus the inlined
-> parsers.
+> If it doesn't work, perform manual [`impl std::str::FromStr`](https://doc.rust-lang.org/std/str/trait.FromStr.html).
 
 ### Program definition: `aoc!` proc macro
 
@@ -59,15 +56,15 @@ To provide a sample input, simply put `#[sample(input, expected)]` on top of the
 
 > [!TIP]
 > The functions `part_{one,two}` must:
->  - Accept a struct with [`std::str::FromStr`](https://doc.rust-lang.org/std/str/trait.FromStr.html) as supertrait.
->    - Same for `input` in `#[sample]`
 >
->  - Return data with [`std::fmt::Display`](https://doc.rust-lang.org/std/fmt/trait.Display.html) as supertrait.
->    - Same for `expected` in `#[sample]`
+> - Accept a struct with [`std::str::FromStr`](https://doc.rust-lang.org/std/str/trait.FromStr.html) as supertrait.
+>   - Same for `input` in `#[sample]`
+> - Return data with [`std::fmt::Display`](https://doc.rust-lang.org/std/fmt/trait.Display.html) as supertrait.
+>   - Same for `expected` in `#[sample]`.
 >
 > ```rust
 > aoc! {
 >    #[sample(input = "a", expected = "b")]
 >    fn part_one(Input { .. }: &Input) -> impl std::fmt::Display {}    
 > }
-> ``` 
+> ```

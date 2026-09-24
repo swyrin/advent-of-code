@@ -22,11 +22,11 @@ struct Machine {
 #[derive(AocInput)]
 struct Input {
     #[parse(
-        light = {
+        rule light: bool = {
             "." => false,
             "#" => true,
-        },
-        button = "(" repeat_sep(usize, ",") ")",
+        };
+        rule button: Vec<usize> = "(" repeat_sep(usize, ",") ")";
         lines(
             "[" target:light+ "] "
             toggles:repeat_sep(button, " ")

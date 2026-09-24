@@ -1,253 +1,278 @@
-use proc_macro::TokenStream;
 use quote::quote;
-use syn::{Data, DeriveInput, Error, Fields, Result, parse_macro_input, parse_quote};
+use syn::{Data, DeriveInput, Error, Fields, Result};
 
 use super::parser::ParseSpec;
 
-pub fn expand(input: TokenStream) -> TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
+pub fn expand(input: impl Into<proc_macro2::TokenStream>) -> proc_macro2::TokenStream {
+    let parsed: Result<DeriveInput> = syn::parse2(input.into());
 
-    match expand_impl(input) {
-        Ok(tokens) => tokens.into(),
-        Err(error) => error.into_compile_error().into(),
-    }
-}
+    let output: Result<proc_macro2::TokenStream> = parsed.and_then(|input| {
+        let struct_name = input.ident.clone();
 
-struct FieldSpec {
-    name: syn::Ident,
-    ty: syn::Type,
-}
+        if let Some(attr) = input.attrs.iter().find(|attr| attr.path().is_ident("parse")) {
+            return Err(Error::new_spanned(
+                attr,
+                "`#[parse(...)]` belongs on the fields of an `AocInput` struct, not on the struct",
+            ));
+        }
 
-fn expand_impl(input: DeriveInput) -> Result<proc_macro2::TokenStream> {
-    let struct_name = input.ident.clone();
+        let fields = match &input.data {
+            Data::Struct(data) => match &data.fields {
+                Fields::Named(fields) => fields.named.iter().cloned().collect::<Vec<_>>(),
 
-    if let Some(attr) = input.attrs.iter().find(|attr| attr.path().is_ident("parse")) {
-        return Err(Error::new_spanned(
-            attr,
-            "`#[parse(...)]` belongs on the fields of an `AocInput` struct, not on the struct",
-        ));
-    }
-
-    let fields = match &input.data {
-        Data::Struct(data) => match &data.fields {
-            Fields::Named(fields) => fields.named.iter().cloned().collect::<Vec<_>>(),
+                _ => {
+                    return Err(Error::new_spanned(
+                        struct_name,
+                        "AocInput requires a struct with named fields",
+                    ));
+                },
+            },
 
             _ => {
                 return Err(Error::new_spanned(
                     struct_name,
-                    "AocInput requires a struct with named fields",
+                    "AocInput can only be derived for structs",
                 ));
             },
-        },
+        };
 
-        _ => {
-            return Err(Error::new_spanned(
-                struct_name,
-                "AocInput can only be derived for structs",
-            ));
-        },
-    };
+        let mut specs = Vec::new();
 
-    if fields.is_empty() {
-        return Err(Error::new_spanned(struct_name, "AocInput requires at least one field"));
-    }
+        for field in &fields {
+            let name = field.ident.as_ref().unwrap().clone();
 
-    let mut specs = Vec::new();
+            let parse_attr = field
+                .attrs
+                .iter()
+                .find(|attr| attr.path().is_ident("parse"))
+                .ok_or_else(|| Error::new_spanned(field, "missing `#[parse(...)]` attribute"))?;
 
-    for field in &fields {
-        let name = field.ident.as_ref().unwrap().clone();
-        let ty = field.ty.clone();
-
-        let parse_attr = field
-            .attrs
-            .iter()
-            .find(|attr| attr.path().is_ident("parse"))
-            .ok_or_else(|| Error::new_spanned(field, "missing `#[parse(...)]` attribute"))?;
-
-        if let Some(attr) = field.attrs.iter().find(|attr| attr.path().is_ident("trust_me")) {
-            return Err(Error::new_spanned(
-                attr,
-                "`#[trust_me]` has been removed; wrap the parser with `section(...)` instead",
-            ));
+            specs.push((name, ParseSpec::parse(parse_attr)?));
         }
 
-        specs.push((
-            FieldSpec {
-                name,
-                ty,
-            },
-            ParseSpec::parse(parse_attr)?,
-        ));
-    }
+        let bindings = specs.iter().map(|(name, _)| name.clone()).collect::<Vec<_>>();
 
-    if specs.len() > 1 {
-        for (index, (_, spec)) in specs.iter().enumerate() {
-            if !spec.uses_sections() {
-                return Err(Error::new_spanned(
-                    &fields[index],
-                    "in a multi-field `AocInput` struct, \
-                     each field's parser must use `section` or `sections`",
-                ));
-            }
-        }
-    }
+        let constructor = quote!(Ok(Self {
+            #(#bindings),*
+        }));
 
-    let field_names = specs.iter().map(|(field, _)| field.name.clone()).collect::<Vec<_>>();
-    let field_tys = specs.iter().map(|(field, _)| field.ty.clone()).collect::<Vec<_>>();
-    let field_strings = field_names.iter().map(|name| name.to_string()).collect::<Vec<_>>();
-
-    let debug_impl = {
-        let mut generics = input.generics.clone();
-        let where_clause = generics.make_where_clause();
-
-        for ty in &field_tys {
-            where_clause.predicates.push(parse_quote!(#ty: ::std::fmt::Debug));
-        }
-
-        let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-
-        quote! {
-            impl #impl_generics ::std::fmt::Debug for #struct_name #ty_generics #where_clause {
-                fn fmt(
-                    &self,
-                    f: &mut ::std::fmt::Formatter<'_>,
-                ) -> ::std::fmt::Result {
-                    f.debug_struct(::std::stringify!(#struct_name))
-                        #(.field(#field_strings, &self.#field_names))*
-                        .finish()
-                }
-            }
-        }
-    };
-
-    let clone_impl = {
-        let mut generics = input.generics.clone();
-        let where_clause = generics.make_where_clause();
-
-        for ty in &field_tys {
-            where_clause.predicates.push(parse_quote!(#ty: ::std::clone::Clone));
-        }
-
-        let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-
-        quote! {
-            impl #impl_generics ::std::clone::Clone for #struct_name #ty_generics #where_clause {
-                fn clone(&self) -> Self {
-                    Self {
-                        #(#field_names: ::std::clone::Clone::clone(&self.#field_names)),*
-                    }
-                }
-            }
-        }
-    };
-
-    let bindings = specs.iter().map(|(field, _)| field.name.clone()).collect::<Vec<_>>();
-
-    let constructor = quote!(Ok(Self {
-        #(#bindings),*
-    }));
-
-    let from_str_body = if specs.len() == 1 {
-        let (field, spec) = &specs[0];
-        let name = &field.name;
-
-        let definitions = spec.definitions.iter().map(|definition| {
-            let name = &definition.name;
-            let expr = &definition.expr;
-
+        let from_str_body = if specs.is_empty() {
             quote! {
-                let #name = macros::aoc_parse::parser!(#expr);
+                let _ = __aoc_input;
+                Ok(Self {})
             }
-        });
-
-        let final_expr = &spec.final_expr;
-
-        quote! {
-            #(#definitions)*
-
-            let __aoc_final =
-                macros::aoc_parse::parser!(#final_expr);
-
-            let #name =
-                __aoc_final.parse(s)?;
-
-            Ok(Self {
-                #name,
-            })
-        }
-    } else {
-        let parses = specs.iter().enumerate().map(|(index, (_, spec))| {
-            let binding = &bindings[index];
-
-            let definitions = spec.definitions.iter().map(|definition| {
-                let name = &definition.name;
-                let expr = &definition.expr;
+        } else {
+            let parsers = specs.iter().map(|(name, spec)| {
+                let expr = &spec.expr;
 
                 quote! {
                     let #name = macros::aoc_parse::parser!(#expr);
                 }
             });
 
-            let final_expr = &spec.final_expr;
+            let labels: Vec<syn::Ident> =
+                (0..specs.len()).map(|index| quote::format_ident!("__aoc_f{}", index)).collect();
 
-            if index + 1 < specs.len() {
-                quote! {
-                    let #binding = {
-                        #(#definitions)*
-
-                        let __aoc_parser =
-                            macros::aoc_parse::parser!(#final_expr);
-
-                        let (__aoc_take, __aoc_value) = macros::parse_sections(
-                            &__aoc_parser,
-                            __aoc_sections.get(__aoc_pos..).unwrap_or(&[]),
-                        )?;
-
-                        __aoc_pos += __aoc_take;
-                        __aoc_value
-                    };
-                }
-            } else {
-                quote! {
-                    let #binding = {
-                        #(#definitions)*
-
-                        let __aoc_parser =
-                            macros::aoc_parse::parser!(#final_expr);
-
-                        __aoc_parser.parse(
-                            &__aoc_sections.get(__aoc_pos..).unwrap_or(&[]).join("\n\n"),
-                        )?
-                    };
-                }
-            }
-        });
-
-        quote! {
-            let __aoc_sections = macros::split_sections(s);
-            let mut __aoc_pos: usize = 0;
-
-            #(#parses)*
-
-            #constructor
-        }
-    };
-
-    Ok(quote! {
-        #debug_impl
-        #clone_impl
-
-        impl std::str::FromStr for #struct_name {
-            type Err = macros::aoc_parse::ParseError;
-
-            fn from_str(
-                s: &str,
-            ) -> Result<Self, Self::Err> {
+            quote! {
                 use macros::aoc_parse::Parser;
                 use macros::aoc_parse::prelude::*;
 
-                #from_str_body
+                #(#parsers)*
+
+                let ( #(#bindings,)* ) = macros::aoc_parse::parser!(
+                    #(#labels:#bindings)*
+                    => ( #(#labels,)* )
+                )
+                .parse(__aoc_input)?;
+
+                #constructor
             }
-        }
-    })
+        };
+
+        Ok(quote! {
+            impl std::str::FromStr for #struct_name {
+                type Err = macros::aoc_parse::ParseError;
+
+                /// How many underscores do I need?
+                fn from_str(
+                    __aoc_input: &str,
+                ) -> Result<Self, Self::Err> {
+                    #from_str_body
+                }
+            }
+        })
+    });
+
+    match output {
+        Ok(tokens) => tokens,
+        Err(error) => error.into_compile_error(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use quote::quote;
+
+    use super::*;
+
+    #[test]
+    fn empty_struct_parses_nothing() {
+        let out = expand(quote! {
+            struct Input {}
+        })
+        .to_string();
+
+        assert!(out.contains("Self { }"));
+        assert!(out.contains("__aoc_input"));
+    }
+
+    #[test]
+    fn single_field_parses_whole_input() {
+        let out = expand(quote! {
+            struct Input {
+                #[parse(line(u32))]
+                number: u32,
+            }
+        })
+        .to_string();
+
+        assert!(out.contains("number"));
+        assert!(out.contains("parser !"));
+        assert!(out.contains("__aoc_f0"));
+    }
+
+    #[test]
+    fn multi_field_gathers_through_mothership() {
+        let out = expand(quote! {
+            struct Input {
+                #[parse(section(line(u32)))]
+                first: u32,
+                #[parse(section(line(u64)))]
+                second: u64,
+            }
+        })
+        .to_string();
+
+        assert!(out.contains("let first ="));
+        assert!(out.contains("let second ="));
+        assert!(out.contains("__aoc_f0 : first"));
+        assert!(out.contains("__aoc_f1 : second"));
+    }
+
+    #[test]
+    fn rules_pass_through_verbatim() {
+        let out = expand(quote! {
+            struct Input {
+                #[parse(
+                    rule light: bool = {
+                        "." => false,
+                        "#" => true,
+                    };
+                    lines(light+)
+                )]
+                rows: Vec<Vec<bool>>,
+            }
+        })
+        .to_string();
+
+        assert!(out.contains("rule"));
+    }
+
+    #[test]
+    fn recursive_rules_pass_through() {
+        let out = expand(quote! {
+            struct Input {
+                #[parse(
+                    rule formation: Formation = {
+                        s:alpha => Formation::Elf(s),
+                        v:stack => Formation::Stack(v),
+                    };
+                    rule stack: Vec<Formation> = '(' v:formation+ ')' => v;
+                    lines(formation+)
+                )]
+                formations: Vec<Vec<Formation>>,
+            }
+        })
+        .to_string();
+
+        assert!(out.contains("rule formation"));
+        assert!(out.contains("rule stack"));
+        assert!(out.contains("formations"));
+        assert!(out.contains("__aoc_f0"));
+    }
+
+    #[test]
+    fn top_level_mapper_passes_through() {
+        let out = expand(quote! {
+            struct Input {
+                #[parse(rows:lines(string(any_char+)) => rows.len())]
+                width: usize,
+            }
+        })
+        .to_string();
+
+        assert!(out.contains("=>"));
+    }
+
+    #[test]
+    fn empty_parse_is_parser_problem() {
+        let out = expand(quote! {
+            struct Input {
+                #[parse()]
+                number: u32,
+            }
+        })
+        .to_string();
+
+        assert!(out.contains("parser !"));
+    }
+
+    #[test]
+    fn parse_on_struct_errors() {
+        let out = expand(quote! {
+            #[parse(line(u32))]
+            struct Input {
+                #[parse(line(u32))]
+                number: u32,
+            }
+        })
+        .to_string();
+
+        assert!(out.contains("compile_error !"));
+    }
+
+    #[test]
+    fn enum_errors() {
+        let out = expand(quote! {
+            enum Input {
+                A,
+                B,
+            }
+        })
+        .to_string();
+
+        assert!(out.contains("compile_error !"));
+    }
+
+    #[test]
+    fn tuple_struct_errors() {
+        let out = expand(quote! {
+            struct Input(u32, u32);
+        })
+        .to_string();
+
+        assert!(out.contains("compile_error !"));
+    }
+
+    #[test]
+    fn missing_parse_attr_errors() {
+        let out = expand(quote! {
+            struct Input {
+                number: u32,
+            }
+        })
+        .to_string();
+
+        assert!(out.contains("compile_error !"));
+    }
 }

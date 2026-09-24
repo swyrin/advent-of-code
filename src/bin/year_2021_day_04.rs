@@ -6,9 +6,7 @@ struct Input {
     #[parse(section(line(repeat_sep(i32, ","))))]
     pub(crate) calls: Vec<i32>,
     #[parse(
-        number = " " * n:i32 => n,
-        board = lines(repeat_sep(number, " ")),
-        sections(board)
+        sections(lines(repeat_sep(" " * n:i32 => n, " ")))
     )]
     pub(crate) boards: Vec<Vec<Vec<i32>>>,
 }
