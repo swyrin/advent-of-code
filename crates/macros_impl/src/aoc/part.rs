@@ -24,37 +24,17 @@ pub fn extract_part(functions: &mut Vec<ItemFn>, name: &str) -> syn::Result<Opti
 }
 
 pub fn input_type_from_function(function: &ItemFn) -> syn::Result<Type> {
-    if function.sig.inputs.len() != 1 {
-        return Err(Error::new_spanned(
+    if let Some(first_arg) = function.sig.inputs.first()
+        && let syn::FnArg::Typed(arg) = first_arg
+        && let syn::Type::Reference(reference) = arg.ty.as_ref()
+    {
+        Ok((*reference.elem).clone())
+    } else {
+        Err(Error::new_spanned(
             &function.sig,
-            "part function must take only the input, e.g. `&Input`",
-        ));
+            "function must be ONLY an input parameter with a reference type.",
+        ))
     }
-
-    let Some(first_arg) = function.sig.inputs.first() else {
-        return Err(Error::new_spanned(
-            &function.sig,
-            "part function must have an input parameter",
-        ));
-    };
-
-    let syn::FnArg::Typed(arg) = first_arg else {
-        return Err(Error::new_spanned(
-            first_arg,
-            "part function must have a typed input parameter",
-        ));
-    };
-
-    let syn::Type::Reference(reference) = arg.ty.as_ref() else {
-        return Err(Error::new_spanned(
-            &arg.ty,
-            "part function input must be a reference, e.g. `&Input`",
-        ));
-    };
-
-    let ty = (*reference.elem).clone();
-
-    Ok(ty)
 }
 
 pub fn generate_part(
