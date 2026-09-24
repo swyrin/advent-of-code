@@ -2,8 +2,12 @@ use proc_macro2::Span;
 use syn::parse::{Parse, ParseStream};
 use syn::{Attribute, Error, Expr, LitStr, Result};
 
+/// Represent a sample test of an Advent of Code part.
 pub struct Sample {
+    /// A literal `&str` of input.
     pub input: LitStr,
+
+    /// A literal `&str` of expected output.
     pub expected: Expr,
 }
 
@@ -53,6 +57,9 @@ impl Parse for Sample {
     }
 }
 
+/// Filter out sample tests.
+///
+/// This one also retain non-`#sample` ones, just in case of `#[forbid(unsafe_code)]`
 pub fn extract_samples(attrs: &mut Vec<Attribute>) -> Result<Vec<Sample>> {
     let mut samples = Vec::new();
 

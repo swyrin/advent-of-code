@@ -1,11 +1,13 @@
 use syn::parse::{Parse, ParseStream};
 use syn::{ItemFn, Result};
 
-pub struct AocInput {
+/// Representing a day in Advent of Code.
+pub struct AdventOfCode {
+    /// Every functions sat inside `aoc!`
     pub functions: Vec<ItemFn>,
 }
 
-impl Parse for AocInput {
+impl Parse for AdventOfCode {
     fn parse(input: ParseStream<'_>) -> Result<Self> {
         let mut functions = Vec::new();
 

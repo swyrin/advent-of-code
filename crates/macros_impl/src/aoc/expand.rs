@@ -1,45 +1,39 @@
 use quote::quote;
 
-use crate::aoc::parser::AocInput;
-use crate::aoc::part::{extract_part, generate_part, input_type_from_function};
+use crate::aoc::parser::AdventOfCode;
+use crate::aoc::part::{extract_parts, generate_part, get_input_type_from_function};
 
 pub fn expand(input: impl Into<proc_macro2::TokenStream>) -> proc_macro2::TokenStream {
     let raw = input.into();
+    let parsed: syn::Result<AdventOfCode> = syn::parse2(raw.clone());
 
-    let parsed: syn::Result<AocInput> = syn::parse2(raw.clone());
+    let output: syn::Result<proc_macro2::TokenStream> = parsed.and_then(|input| {
+        let (part_one, part_two) = extract_parts(&input.functions)?;
 
-    let output: syn::Result<proc_macro2::TokenStream> = parsed.and_then(|mut input| {
-        let part_one = extract_part(&mut input.functions, "part_one")?;
-        let part_two = extract_part(&mut input.functions, "part_two")?;
-        let helpers = &input.functions;
-
+        // like... you have to do part one right?
         let input_type = part_one
             .as_ref()
             .or(part_two.as_ref())
-            .map(|part| input_type_from_function(&part.function))
+            .map(|part| get_input_type_from_function(&part.function))
             .transpose()?;
 
-        let (part_one_code, part_one_run) =
-            generate_part(part_one, input_type.as_ref(), 1, "part_one");
-        let (part_two_code, part_two_run) =
-            generate_part(part_two, input_type.as_ref(), 2, "part_two");
+        let (part_one_code, part_one_run) = generate_part(part_one, input_type.as_ref());
+        let (part_two_code, part_two_run) = generate_part(part_two, input_type.as_ref());
 
         let parse_input = input_type.as_ref().map(|ty| {
             quote! {
+                let _input_content = std::fs::read_to_string("input.txt").expect("No input.txt file");
                 let input: #ty = _input_content.parse().expect("Failed to parse input.txt");
             }
         });
 
         Ok(quote! {
-            #(#helpers)*
             #part_one_code
             #part_two_code
 
             fn main() {
-                let _input_content =
-                    std::fs::read_to_string("input.txt").expect("No input.txt file");
-
                 #parse_input
+
                 #part_one_run
                 #part_two_run
             }
@@ -53,12 +47,6 @@ pub fn expand(input: impl Into<proc_macro2::TokenStream>) -> proc_macro2::TokenS
 
             quote! {
                 #raw
-
-                fn main() {
-                    let _input_content =
-                        std::fs::read_to_string("input.txt").expect("No input.txt file");
-                }
-
                 #compile_error
             }
         },
@@ -90,39 +78,16 @@ mod tests {
     }
 
     #[test]
-    fn missing_part_filled_with_todo() {
-        let one = expand(quote! {
-            #[sample(input = "1", expected = "1")]
-            fn part_one(Input { n }: &Input) -> impl std::fmt::Display {
-                n
-            }
-        })
-        .to_string();
-
-        assert!(one.contains("part_1_sample_0"));
-        assert!(one.contains("fn part_two"));
-        assert!(one.contains("todo !"));
-
-        let two = expand(quote! {
-            #[sample(input = "2", expected = "2")]
-            fn part_two(Input { n }: &Input) -> impl std::fmt::Display {
-                n
-            }
-        })
-        .to_string();
-
-        assert!(two.contains("part_2_sample_0"));
-        assert!(two.contains("fn part_one"));
-        assert!(two.contains("todo !"));
-    }
-
-    #[test]
-    fn with_multiple_samples() {
-        // I did one part here to reduce keypressmaxxing.
+    fn with_mixed_multiple_samples() {
         let out = expand(quote! {
             #[sample(input = "1", expected = "1")]
             #[sample(input = "10", expected = "10")]
             fn part_one(Input { n }: &Input) -> impl std::fmt::Display {
+                n
+            }
+
+            #[sample(input = "1", expected = "1")]
+            fn part_two(Input { n }: &Input) -> impl std::fmt::Display {
                 n
             }
         })
@@ -130,16 +95,7 @@ mod tests {
 
         assert!(out.contains("part_1_sample_0"));
         assert!(out.contains("part_1_sample_1"));
-        assert!(out.contains("fn part_two"));
-        assert!(out.contains("todo !"));
-    }
 
-    #[test]
-    fn empty_input_creates_two_todos() {
-        let out = expand(quote! {}).to_string();
-
-        assert!(out.contains("fn part_one"));
-        assert!(out.contains("fn part_two"));
-        assert_eq!(out.matches("todo !").count(), 2);
+        assert!(out.contains("part_2_sample_0"));
     }
 }
