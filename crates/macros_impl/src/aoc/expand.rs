@@ -49,6 +49,10 @@ mod tests {
         })
         .unwrap_err();
 
-        assert!(error.to_string().contains("aoc! does not accept input"));
+        assert!(
+            error
+                .to_string()
+                .contains("annotate part functions with #[part], not inside aoc!{} macro!")
+        );
     }
 }
