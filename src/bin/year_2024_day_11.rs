@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use macros::{AocInput, aoc};
+use macros::{AocInput, aoc, part, sample};
 
 #[derive(AocInput)]
 struct Input {
@@ -41,21 +41,24 @@ fn blink(input: &Input, times: usize) -> u128 {
 
     stones.values().sum()
 }
+aoc!();
 
-aoc! {
-    #[sample(
-        input = "125 17",
-        expected = "55312"
-    )]
-    fn part_one(input @ Input { .. }: &Input) -> impl std::fmt::Display {
-        blink(input, 25)
-    }
+#[part]
+#[sample(input = "125 17", expected = "55312")]
+fn part_one(
+    input @ Input {
+        ..
+    }: &Input,
+) -> impl std::fmt::Display {
+    blink(input, 25)
+}
 
-    #[sample(
-        input = "125 17",
-        expected = "65601038650482"
-    )]
-    fn part_two(input @ Input { .. }: &Input) -> impl std::fmt::Display {
-        blink(input, 75)
-    }
+#[part]
+#[sample(input = "125 17", expected = "65601038650482")]
+fn part_two(
+    input @ Input {
+        ..
+    }: &Input,
+) -> impl std::fmt::Display {
+    blink(input, 75)
 }

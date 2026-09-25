@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::hash::RandomState;
 
-use macros::{AocInput, aoc};
+use macros::{AocInput, aoc, part, sample};
 use petgraph::algo::all_simple_paths;
 use petgraph::graph::{DiGraph, NodeIndex};
 
@@ -19,10 +19,11 @@ struct Input {
     ))]
     pub(crate) entries: Vec<Adjacent>,
 }
+aoc!();
 
-aoc! {
-    #[sample(
-        input = "aaa: you hhh
+#[part]
+#[sample(
+    input = "aaa: you hhh
 you: bbb ccc
 bbb: ddd eee
 ccc: ddd eee fff
@@ -32,33 +33,38 @@ fff: out
 ggg: out
 hhh: ccc fff iii
 iii: out",
-        expected = "5"
-    )]
-    fn part_one(Input { entries }: &Input) -> impl std::fmt::Display {
-        let mut graph = DiGraph::<String, ()>::new();
-        let mut node_indices: HashMap<String, NodeIndex> = HashMap::new();
+    expected = "5"
+)]
+fn part_one(
+    Input {
+        entries,
+    }: &Input,
+) -> impl std::fmt::Display {
+    let mut graph = DiGraph::<String, ()>::new();
+    let mut node_indices: HashMap<String, NodeIndex> = HashMap::new();
 
-        for entry in entries {
-            let parent_index = *node_indices
-                .entry(entry.from.clone())
-                .or_insert_with(|| graph.add_node(entry.from.clone()));
+    for entry in entries {
+        let parent_index = *node_indices
+            .entry(entry.from.clone())
+            .or_insert_with(|| graph.add_node(entry.from.clone()));
 
-            for neighbor in &entry.neighbors {
-                let child_index = *node_indices
-                    .entry(neighbor.clone())
-                    .or_insert_with(|| graph.add_node(neighbor.clone()));
-                graph.add_edge(parent_index, child_index, ());
-            }
+        for neighbor in &entry.neighbors {
+            let child_index = *node_indices
+                .entry(neighbor.clone())
+                .or_insert_with(|| graph.add_node(neighbor.clone()));
+            graph.add_edge(parent_index, child_index, ());
         }
-
-        let you = *node_indices.get("you").unwrap();
-        let out = *node_indices.get("out").unwrap();
-
-        all_simple_paths::<Vec<_>, _, RandomState>(&graph, you, out, 0, None).count()
     }
 
-    #[sample(
-        input = "svr: aaa bbb
+    let you = *node_indices.get("you").unwrap();
+    let out = *node_indices.get("out").unwrap();
+
+    all_simple_paths::<Vec<_>, _, RandomState>(&graph, you, out, 0, None).count()
+}
+
+#[part]
+#[sample(
+    input = "svr: aaa bbb
 aaa: fft
 fft: ccc
 bbb: tty
@@ -71,14 +77,17 @@ dac: fff
 fff: ggg hhh
 ggg: out
 hhh: out",
-        expected = "2"
-    )]
-    fn part_two(Input { entries }: &Input) -> impl std::fmt::Display {
-        let connections: HashMap<_, _> =
-            entries.iter().map(|entry| (entry.from.clone(), entry.neighbors.clone())).collect();
+    expected = "2"
+)]
+fn part_two(
+    Input {
+        entries,
+    }: &Input,
+) -> impl std::fmt::Display {
+    let connections: HashMap<_, _> =
+        entries.iter().map(|entry| (entry.from.clone(), entry.neighbors.clone())).collect();
 
-        count_routes(&connections, ("svr".to_string(), false, false), &mut HashMap::new())
-    }
+    count_routes(&connections, ("svr".to_string(), false, false), &mut HashMap::new())
 }
 
 fn count_routes(

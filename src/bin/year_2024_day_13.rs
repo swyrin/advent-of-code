@@ -1,4 +1,4 @@
-use macros::{AocInput, aoc};
+use macros::{AocInput, aoc, part, sample};
 
 #[derive(Clone, Copy, Debug)]
 struct Machine {
@@ -52,10 +52,11 @@ fn total_cost(input: &Input, offset: i128, max_presses: Option<i128>) -> u128 {
         .filter_map(|machine| token_cost(machine, offset, max_presses))
         .sum()
 }
+aoc!();
 
-aoc! {
-    #[sample(
-        input = "Button A: X+94, Y+34
+#[part]
+#[sample(
+    input = "Button A: X+94, Y+34
 Button B: X+22, Y+67
 Prize: X=8400, Y=5400
 
@@ -70,14 +71,19 @@ Prize: X=7870, Y=6450
 Button A: X+69, Y+23
 Button B: X+27, Y+71
 Prize: X=18641, Y=10279",
-        expected = "480"
-    )]
-    fn part_one(input @ Input { .. }: &Input) -> impl std::fmt::Display {
-        total_cost(input, 0, Some(100))
-    }
+    expected = "480"
+)]
+fn part_one(
+    input @ Input {
+        ..
+    }: &Input,
+) -> impl std::fmt::Display {
+    total_cost(input, 0, Some(100))
+}
 
-    #[sample(
-        input = "Button A: X+94, Y+34
+#[part]
+#[sample(
+    input = "Button A: X+94, Y+34
 Button B: X+22, Y+67
 Prize: X=8400, Y=5400
 
@@ -92,9 +98,12 @@ Prize: X=7870, Y=6450
 Button A: X+69, Y+23
 Button B: X+27, Y+71
 Prize: X=18641, Y=10279",
-        expected = "875318608908"
-    )]
-    fn part_two(input @ Input { .. }: &Input) -> impl std::fmt::Display {
-        total_cost(input, 10_000_000_000_000, None)
-    }
+    expected = "875318608908"
+)]
+fn part_two(
+    input @ Input {
+        ..
+    }: &Input,
+) -> impl std::fmt::Display {
+    total_cost(input, 10_000_000_000_000, None)
 }

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use macros::{AocInput, aoc};
+use macros::{AocInput, aoc, part, sample};
 use petgraph::graph::{DiGraph, NodeIndex};
 use petgraph::visit::Bfs;
 
@@ -102,10 +102,11 @@ fn count_trails(
     memo.insert(node, count);
     count
 }
+aoc!();
 
-aoc! {
-    #[sample(
-        input = "89010123
+#[part]
+#[sample(
+    input = "89010123
 78121874
 87430965
 96549874
@@ -113,30 +114,35 @@ aoc! {
 32019012
 01329801
 10456732",
-        expected = "36"
-    )]
-    fn part_one(input @ Input { .. }: &Input) -> impl std::fmt::Display {
-        let graph = input.graph();
-        let mut total = 0;
+    expected = "36"
+)]
+fn part_one(
+    input @ Input {
+        ..
+    }: &Input,
+) -> impl std::fmt::Display {
+    let graph = input.graph();
+    let mut total = 0;
 
-        for trailhead in graph.node_indices().filter(|&node| graph[node] == 0) {
-            let mut search = Bfs::new(&graph, trailhead);
-            let mut count = 0;
+    for trailhead in graph.node_indices().filter(|&node| graph[node] == 0) {
+        let mut search = Bfs::new(&graph, trailhead);
+        let mut count = 0;
 
-            while let Some(node) = search.next(&graph) {
-                if graph[node] == 9 {
-                    count += 1;
-                }
+        while let Some(node) = search.next(&graph) {
+            if graph[node] == 9 {
+                count += 1;
             }
-
-            total += count;
         }
 
-        total
+        total += count;
     }
 
-    #[sample(
-        input = "89010123
+    total
+}
+
+#[part]
+#[sample(
+    input = "89010123
 78121874
 87430965
 96549874
@@ -144,16 +150,19 @@ aoc! {
 32019012
 01329801
 10456732",
-        expected = "81"
-    )]
-    fn part_two(input @ Input { .. }: &Input) -> impl std::fmt::Display {
-        let graph = input.graph();
-        let mut memo = HashMap::new();
+    expected = "81"
+)]
+fn part_two(
+    input @ Input {
+        ..
+    }: &Input,
+) -> impl std::fmt::Display {
+    let graph = input.graph();
+    let mut memo = HashMap::new();
 
-        graph
-            .node_indices()
-            .filter(|&node| graph[node] == 0)
-            .map(|trailhead| count_trails(&graph, trailhead, &mut memo))
-            .sum::<u64>()
-    }
+    graph
+        .node_indices()
+        .filter(|&node| graph[node] == 0)
+        .map(|trailhead| count_trails(&graph, trailhead, &mut memo))
+        .sum::<u64>()
 }

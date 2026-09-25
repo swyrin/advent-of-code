@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use macros::{AocInput, aoc};
+use macros::{AocInput, aoc, part, sample};
 
 type Position = (usize, usize);
 
@@ -67,10 +67,11 @@ impl Input {
         }
     }
 }
+aoc!();
 
-aoc! {
-    #[sample(
-        input = "....#.....
+#[part]
+#[sample(
+    input = "....#.....
 .........#
 ..........
 ..#.......
@@ -80,14 +81,19 @@ aoc! {
 ........#.
 #.........
 ......#...",
-        expected = "41"
-    )]
-    fn part_one(input @ Input { .. }: &Input) -> impl std::fmt::Display {
-        input.walk(None).1.len()
-    }
+    expected = "41"
+)]
+fn part_one(
+    input @ Input {
+        ..
+    }: &Input,
+) -> impl std::fmt::Display {
+    input.walk(None).1.len()
+}
 
-    #[sample(
-        input = "....#.....
+#[part]
+#[sample(
+    input = "....#.....
 .........#
 ..........
 ..#.......
@@ -97,15 +103,18 @@ aoc! {
 ........#.
 #.........
 ......#...",
-        expected = "6"
-    )]
-    fn part_two(input @ Input { .. }: &Input) -> impl std::fmt::Display {
-        input
-            .walk(None)
-            .1
-            .into_iter()
-            .filter(|&position| position != input.get_start())
-            .filter(|&position| input.walk(Some(position)).0)
-            .count()
-    }
+    expected = "6"
+)]
+fn part_two(
+    input @ Input {
+        ..
+    }: &Input,
+) -> impl std::fmt::Display {
+    input
+        .walk(None)
+        .1
+        .into_iter()
+        .filter(|&position| position != input.get_start())
+        .filter(|&position| input.walk(Some(position)).0)
+        .count()
 }

@@ -1,4 +1,4 @@
-use macros::{AocInput, aoc};
+use macros::{AocInput, aoc, part, sample};
 
 #[derive(AocInput)]
 struct Input {
@@ -66,10 +66,11 @@ fn removable_rolls(grid: &[Vec<char>]) -> Vec<(usize, usize)> {
         })
         .collect()
 }
+aoc!();
 
-aoc! {
-    #[sample(
-        input = "..@@.@@@@.
+#[part]
+#[sample(
+    input = "..@@.@@@@.
 @@@.@.@.@@
 @@@@@.@.@@
 @.@@@@..@.
@@ -79,14 +80,19 @@ aoc! {
 @.@@@.@@@@
 .@@@@@@@@.
 @.@.@@@.@.",
-        expected = "13"
-    )]
-    fn part_one(Input { grid }: &Input) -> impl std::fmt::Display {
-        removable_rolls(grid).len()
-    }
+    expected = "13"
+)]
+fn part_one(
+    Input {
+        grid,
+    }: &Input,
+) -> impl std::fmt::Display {
+    removable_rolls(grid).len()
+}
 
-    #[sample(
-        input = "..@@.@@@@.
+#[part]
+#[sample(
+    input = "..@@.@@@@.
 @@@.@.@.@@
 @@@@@.@.@@
 @.@@@@..@.
@@ -96,25 +102,28 @@ aoc! {
 @.@@@.@@@@
 .@@@@@@@@.
 @.@.@@@.@.",
-        expected = "43"
-    )]
-    fn part_two(Input { grid }: &Input) -> impl std::fmt::Display {
-        let mut grid = grid.clone();
-        let mut destroy_count = 0;
+    expected = "43"
+)]
+fn part_two(
+    Input {
+        grid,
+    }: &Input,
+) -> impl std::fmt::Display {
+    let mut grid = grid.clone();
+    let mut destroy_count = 0;
 
-        loop {
-            let rolls = removable_rolls(&grid);
+    loop {
+        let rolls = removable_rolls(&grid);
 
-            if rolls.is_empty() {
-                break;
-            }
-
-            destroy_count += rolls.len();
-            for (row, column) in rolls {
-                grid[row][column] = '.';
-            }
+        if rolls.is_empty() {
+            break;
         }
 
-        destroy_count
+        destroy_count += rolls.len();
+        for (row, column) in rolls {
+            grid[row][column] = '.';
+        }
     }
+
+    destroy_count
 }

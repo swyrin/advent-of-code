@@ -1,4 +1,3 @@
 pub mod expand;
-mod parser;
-mod part;
-mod sample;
+pub mod part;
+pub(crate) mod sample;

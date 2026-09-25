@@ -1,56 +1,31 @@
+use proc_macro2::{Span, TokenStream};
 use quote::quote;
+use syn::Error;
 
-use crate::aoc::parser::AdventOfCode;
-use crate::aoc::part::{extract_parts, generate_part, get_input_type_from_function};
-
-pub fn expand(input: impl Into<proc_macro2::TokenStream>) -> proc_macro2::TokenStream {
-    let raw = input.into();
-    let parsed: syn::Result<AdventOfCode> = syn::parse2(raw.clone());
-
-    let output: syn::Result<proc_macro2::TokenStream> = parsed.and_then(|input| {
-        let (part_one, part_two) = extract_parts(&input.functions)?;
-
-        // like... you have to do part one right?
-        let input_type = part_one
-            .as_ref()
-            .or(part_two.as_ref())
-            .map(|part| get_input_type_from_function(&part.function))
-            .transpose()?;
-
-        let (part_one_code, part_one_run) = generate_part(part_one, input_type.as_ref());
-        let (part_two_code, part_two_run) = generate_part(part_two, input_type.as_ref());
-
-        let parse_input = input_type.as_ref().map(|ty| {
-            quote! {
-                let _input_content = std::fs::read_to_string("input.txt").expect("No input.txt file");
-                let input: #ty = _input_content.parse().expect("Failed to parse input.txt");
-            }
-        });
-
-        Ok(quote! {
-            #part_one_code
-            #part_two_code
-
-            fn main() {
-                #parse_input
-
-                #part_one_run
-                #part_two_run
-            }
-        })
-    });
-
-    match output {
-        Ok(tokens) => tokens,
-        Err(error) => {
-            let compile_error = error.into_compile_error();
-
-            quote! {
-                #raw
-                #compile_error
-            }
-        },
+pub fn expand(input: TokenStream) -> syn::Result<TokenStream> {
+    if !input.is_empty() {
+        return Err(Error::new(Span::call_site(), "annotate part functions with #[part]"));
     }
+
+    Ok(quote! {
+        fn main() {
+            let mut parts = ::macros::inventory::iter::<::macros::AocPart>()
+                .copied()
+                .collect::<Vec<_>>();
+
+            if parts.is_empty() {
+                return;
+            }
+
+            parts.sort_unstable_by_key(|part| part.name);
+
+            let content = ::std::fs::read_to_string("input.txt").expect("No input.txt file");
+
+            for part in parts {
+                (part.run)(&content);
+            }
+        }
+    })
 }
 
 #[cfg(test)]
@@ -60,42 +35,20 @@ mod tests {
     use super::*;
 
     #[test]
-    fn extra_param_errors() {
-        let out = expand(quote! {
-            #[sample(input = "1", expected = "1")]
-            fn part_one(input: &Input, extra: u32) -> impl std::fmt::Display {
-                input.n
-            }
+    fn properly_generates_registry_runner() {
+        let output = expand(quote!()).unwrap().to_string();
 
-            #[sample(input = "2", expected = "2")]
-            fn part_two(input: &Input) -> impl std::fmt::Display {
-                input.n
-            }
-        })
-        .to_string();
-
-        assert!(out.contains("compile_error !"));
+        assert!(output.contains("fn main"));
+        assert!(output.contains("inventory :: iter"));
     }
 
     #[test]
-    fn with_mixed_multiple_samples() {
-        let out = expand(quote! {
-            #[sample(input = "1", expected = "1")]
-            #[sample(input = "10", expected = "10")]
-            fn part_one(Input { n }: &Input) -> impl std::fmt::Display {
-                n
-            }
-
-            #[sample(input = "1", expected = "1")]
-            fn part_two(Input { n }: &Input) -> impl std::fmt::Display {
-                n
-            }
+    fn nonempty_input_errors() {
+        let error = expand(quote! {
+            fn helper() {}
         })
-        .to_string();
+        .unwrap_err();
 
-        assert!(out.contains("part_1_sample_0"));
-        assert!(out.contains("part_1_sample_1"));
-
-        assert!(out.contains("part_2_sample_0"));
+        assert!(error.to_string().contains("aoc! does not accept input"));
     }
 }

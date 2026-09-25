@@ -1,4 +1,4 @@
-use macros::{AocInput, aoc};
+use macros::{AocInput, aoc, part, sample};
 
 type Report = Vec<u32>;
 
@@ -18,44 +18,53 @@ fn is_safe(report: &[u32]) -> bool {
 
     increasing || decreasing
 }
+aoc!();
 
-aoc! {
-    #[sample(
-        input = "7 6 4 2 1
+#[part]
+#[sample(
+    input = "7 6 4 2 1
 1 2 7 8 9
 9 7 6 2 1
 1 3 2 4 5
 8 6 4 4 1
 1 3 6 7 9",
-        expected = "2"
-    )]
-    fn part_one(Input { reports }: &Input) -> impl std::fmt::Display {
-        reports.iter().filter(|report| is_safe(report)).count()
-    }
+    expected = "2"
+)]
+fn part_one(
+    Input {
+        reports,
+    }: &Input,
+) -> impl std::fmt::Display {
+    reports.iter().filter(|report| is_safe(report)).count()
+}
 
-    #[sample(
-        input = "7 6 4 2 1
+#[part]
+#[sample(
+    input = "7 6 4 2 1
 1 2 7 8 9
 9 7 6 2 1
 1 3 2 4 5
 8 6 4 4 1
 1 3 6 7 9",
-        expected = "4"
-    )]
-    fn part_two(Input { reports }: &Input) -> impl std::fmt::Display {
-        reports
-            .iter()
-            .filter(|report| {
-                is_safe(report)
-                    || (0..report.len()).any(|removed| {
-                        let candidate = report
-                            .iter()
-                            .enumerate()
-                            .filter_map(|(index, value)| (index != removed).then_some(*value))
-                            .collect::<Vec<_>>();
-                        is_safe(&candidate)
-                    })
-            })
-            .count()
-    }
+    expected = "4"
+)]
+fn part_two(
+    Input {
+        reports,
+    }: &Input,
+) -> impl std::fmt::Display {
+    reports
+        .iter()
+        .filter(|report| {
+            is_safe(report)
+                || (0..report.len()).any(|removed| {
+                    let candidate = report
+                        .iter()
+                        .enumerate()
+                        .filter_map(|(index, value)| (index != removed).then_some(*value))
+                        .collect::<Vec<_>>();
+                    is_safe(&candidate)
+                })
+        })
+        .count()
 }

@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use macros::{AocInput, aoc};
+use macros::{AocInput, aoc, part, sample};
 
 #[derive(AocInput)]
 struct Input {
@@ -64,10 +64,11 @@ fn calibration_result(input: &Input, allow_concatenation: bool) -> u128 {
         .map(|(target, _)| u128::from(*target))
         .sum()
 }
+aoc!();
 
-aoc! {
-    #[sample(
-        input = "190: 10 19
+#[part]
+#[sample(
+    input = "190: 10 19
 3267: 81 40 27
 83: 17 5
 156: 15 6
@@ -76,14 +77,19 @@ aoc! {
 192: 17 8 14
 21037: 9 7 18 13
 292: 11 6 16 20",
-        expected = "3749"
-    )]
-    fn part_one(input @ Input { .. }: &Input) -> impl std::fmt::Display {
-        calibration_result(input, false)
-    }
+    expected = "3749"
+)]
+fn part_one(
+    input @ Input {
+        ..
+    }: &Input,
+) -> impl std::fmt::Display {
+    calibration_result(input, false)
+}
 
-    #[sample(
-        input = "190: 10 19
+#[part]
+#[sample(
+    input = "190: 10 19
 3267: 81 40 27
 83: 17 5
 156: 15 6
@@ -92,9 +98,12 @@ aoc! {
 192: 17 8 14
 21037: 9 7 18 13
 292: 11 6 16 20",
-        expected = "11387"
-    )]
-    fn part_two(input @ Input { .. }: &Input) -> impl std::fmt::Display {
-        calibration_result(input, true)
-    }
+    expected = "11387"
+)]
+fn part_two(
+    input @ Input {
+        ..
+    }: &Input,
+) -> impl std::fmt::Display {
+    calibration_result(input, true)
 }

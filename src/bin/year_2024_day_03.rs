@@ -1,4 +1,4 @@
-use macros::{AocInput, aoc};
+use macros::{AocInput, aoc, part, sample};
 
 #[derive(AocInput)]
 struct Input {
@@ -70,21 +70,30 @@ fn sum_multiplications(memory: &str, honor_conditionals: bool) -> u128 {
 
     total
 }
+aoc!();
 
-aoc! {
-    #[sample(
-        input = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))",
-        expected = "161"
-    )]
-    fn part_one(Input { memory }: &Input) -> impl std::fmt::Display {
-        sum_multiplications(memory, false)
-    }
+#[part]
+#[sample(
+    input = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))",
+    expected = "161"
+)]
+fn part_one(
+    Input {
+        memory,
+    }: &Input,
+) -> impl std::fmt::Display {
+    sum_multiplications(memory, false)
+}
 
-    #[sample(
-        input = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))",
-        expected = "48"
-    )]
-    fn part_two(Input { memory }: &Input) -> impl std::fmt::Display {
-        sum_multiplications(memory, true)
-    }
+#[part]
+#[sample(
+    input = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))",
+    expected = "48"
+)]
+fn part_two(
+    Input {
+        memory,
+    }: &Input,
+) -> impl std::fmt::Display {
+    sum_multiplications(memory, true)
 }

@@ -1,6 +1,8 @@
 use proc_macro2::Span;
 use syn::parse::{Parse, ParseStream};
-use syn::{Attribute, Error, Expr, LitStr, Result};
+use syn::{Attribute, Error, Expr, LitStr, Result, parse_quote};
+
+pub(crate) const SAMPLE_MARKER: &str = "__aoc_part_sample";
 
 /// Represent a sample test of an Advent of Code part.
 pub struct Sample {
@@ -57,10 +59,24 @@ impl Parse for Sample {
     }
 }
 
-/// Filter out sample tests.
-///
-/// This one also retain non-`#sample` ones, just in case of `#[forbid(unsafe_code)]`
-pub fn extract_samples(attrs: &mut Vec<Attribute>) -> Result<Vec<Sample>> {
+pub fn mark_for_expansion(attrs: &mut Vec<Attribute>) {
+    let original = std::mem::take(attrs);
+    let marker = syn::Ident::new(SAMPLE_MARKER, proc_macro2::Span::call_site());
+
+    *attrs = original
+        .into_iter()
+        .flat_map(|attr| {
+            if attr.path().is_ident("sample") {
+                vec![attr, parse_quote!(#[#marker])]
+            } else {
+                vec![attr]
+            }
+        })
+        .collect();
+}
+
+/// Collect sample tests.
+pub fn extract_samples(attrs: &[Attribute]) -> Result<Vec<Sample>> {
     let mut samples = Vec::new();
 
     for attr in attrs.iter() {
@@ -68,9 +84,6 @@ pub fn extract_samples(attrs: &mut Vec<Attribute>) -> Result<Vec<Sample>> {
             samples.push(attr.parse_args::<Sample>()?);
         }
     }
-
-    // Only removes attributes on success.
-    attrs.retain(|attr| !attr.path().is_ident("sample"));
 
     Ok(samples)
 }

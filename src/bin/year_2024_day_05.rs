@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use macros::{AocInput, aoc};
+use macros::{AocInput, aoc, part, sample};
 
 #[derive(AocInput)]
 struct Input {
@@ -58,10 +58,11 @@ fn reorder(update: &[u32], rules: &[(u32, u32)]) -> Vec<u32> {
 
     ordered
 }
+aoc!();
 
-aoc! {
-    #[sample(
-        input = "47|53
+#[part]
+#[sample(
+    input = "47|53
 97|13
 97|61
 97|47
@@ -89,18 +90,24 @@ aoc! {
 75,97,47,61,53
 61,13,29
 97,13,75,29,47",
-        expected = "143"
-    )]
-    fn part_one(Input { rules, updates }: &Input) -> impl std::fmt::Display {
-        updates
-            .iter()
-            .filter(|update| is_ordered(update, rules))
-            .map(|update| u64::from(update[update.len() / 2]))
-            .sum::<u64>()
-    }
+    expected = "143"
+)]
+fn part_one(
+    Input {
+        rules,
+        updates,
+    }: &Input,
+) -> impl std::fmt::Display {
+    updates
+        .iter()
+        .filter(|update| is_ordered(update, rules))
+        .map(|update| u64::from(update[update.len() / 2]))
+        .sum::<u64>()
+}
 
-    #[sample(
-        input = "47|53
+#[part]
+#[sample(
+    input = "47|53
 97|13
 97|61
 97|47
@@ -128,14 +135,18 @@ aoc! {
 75,97,47,61,53
 61,13,29
 97,13,75,29,47",
-        expected = "123"
-    )]
-    fn part_two(Input { rules, updates }: &Input) -> impl std::fmt::Display {
-        updates
-            .iter()
-            .filter(|update| !is_ordered(update, rules))
-            .map(|update| reorder(update, rules))
-            .map(|update| u64::from(update[update.len() / 2]))
-            .sum::<u64>()
-    }
+    expected = "123"
+)]
+fn part_two(
+    Input {
+        rules,
+        updates,
+    }: &Input,
+) -> impl std::fmt::Display {
+    updates
+        .iter()
+        .filter(|update| !is_ordered(update, rules))
+        .map(|update| reorder(update, rules))
+        .map(|update| u64::from(update[update.len() / 2]))
+        .sum::<u64>()
 }

@@ -1,4 +1,4 @@
-use macros::{AocInput, aoc};
+use macros::{AocInput, aoc, part, sample};
 
 #[derive(Debug, Clone)]
 struct Board {
@@ -38,9 +38,11 @@ impl Input {
 }
 
 // Eric put a troll problem.
-aoc! {
-    #[sample(
-        input = "0:
+aoc!();
+
+#[part]
+#[sample(
+    input = "0:
 ###
 ##.
 ##.
@@ -73,22 +75,25 @@ aoc! {
 4x4: 0 0 0 0 2 0
 12x5: 1 0 1 0 2 2
 12x5: 1 0 1 0 3 2",
-        expected = "3"
-    )]
-    fn part_one(input @ Input { boards, .. }: &Input) -> impl std::fmt::Display {
-        let brick_areas = input.brick_areas();
+    expected = "3"
+)]
+fn part_one(
+    input @ Input {
+        boards, ..
+    }: &Input,
+) -> impl std::fmt::Display {
+    let brick_areas = input.brick_areas();
 
-        boards
-            .iter()
-            .filter(|board| {
-                let required_area = board
-                    .piece_counts
-                    .iter()
-                    .zip(&brick_areas)
-                    .map(|(piece_count, brick_area)| piece_count * brick_area)
-                    .sum::<usize>();
-                board.area > required_area
-            })
-            .count()
-    }
+    boards
+        .iter()
+        .filter(|board| {
+            let required_area = board
+                .piece_counts
+                .iter()
+                .zip(&brick_areas)
+                .map(|(piece_count, brick_area)| piece_count * brick_area)
+                .sum::<usize>();
+            board.area > required_area
+        })
+        .count()
 }

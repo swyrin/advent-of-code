@@ -1,4 +1,4 @@
-use macros::{AocInput, aoc};
+use macros::{AocInput, aoc, part, sample};
 
 #[derive(AocInput)]
 struct Input {
@@ -24,62 +24,65 @@ fn checksum(disk: &[Option<u64>]) -> u128 {
         .filter_map(|(index, file_id)| file_id.map(|file_id| index as u128 * u128::from(file_id)))
         .sum()
 }
+aoc!();
 
-aoc! {
-    #[sample(
-        input = "2333133121414131402",
-        expected = "1928"
-    )]
-    fn part_one(Input { disk_map }: &Input) -> impl std::fmt::Display {
-        let mut disk = expand(disk_map);
+#[part]
+#[sample(input = "2333133121414131402", expected = "1928")]
+fn part_one(
+    Input {
+        disk_map,
+    }: &Input,
+) -> impl std::fmt::Display {
+    let mut disk = expand(disk_map);
 
-        if !disk.is_empty() {
-            let mut left = 0;
-            let mut right = disk.len() - 1;
+    if !disk.is_empty() {
+        let mut left = 0;
+        let mut right = disk.len() - 1;
 
-            while left < right {
-                while left < disk.len() && disk[left].is_some() {
-                    left += 1;
-                }
-                while right > 0 && disk[right].is_none() {
-                    right -= 1;
-                }
-                if left >= right {
-                    break;
-                }
-
-                disk[left] = disk[right].take();
+        while left < right {
+            while left < disk.len() && disk[left].is_some() {
+                left += 1;
             }
-        }
+            while right > 0 && disk[right].is_none() {
+                right -= 1;
+            }
+            if left >= right {
+                break;
+            }
 
-        checksum(&disk)
+            disk[left] = disk[right].take();
+        }
     }
 
-    #[sample(
-        input = "2333133121414131402",
-        expected = "2858"
-    )]
-    fn part_two(Input { disk_map }: &Input) -> impl std::fmt::Display {
-        let mut disk = expand(disk_map);
-        let file_count = disk_map.len().div_ceil(2);
+    checksum(&disk)
+}
 
-        for file_id in (0..file_count).rev().map(|file_id| file_id as u64) {
-            let Some(start) = disk.iter().position(|&entry| entry == Some(file_id)) else {
-                continue;
-            };
-            let length = disk[start..].iter().take_while(|&&entry| entry == Some(file_id)).count();
-            let Some(destination) =
-                disk[..start].windows(length).position(|window| window.iter().all(Option::is_none))
-            else {
-                continue;
-            };
+#[part]
+#[sample(input = "2333133121414131402", expected = "2858")]
+fn part_two(
+    Input {
+        disk_map,
+    }: &Input,
+) -> impl std::fmt::Display {
+    let mut disk = expand(disk_map);
+    let file_count = disk_map.len().div_ceil(2);
 
-            for offset in 0..length {
-                disk[destination + offset] = Some(file_id);
-                disk[start + offset] = None;
-            }
+    for file_id in (0..file_count).rev().map(|file_id| file_id as u64) {
+        let Some(start) = disk.iter().position(|&entry| entry == Some(file_id)) else {
+            continue;
+        };
+        let length = disk[start..].iter().take_while(|&&entry| entry == Some(file_id)).count();
+        let Some(destination) =
+            disk[..start].windows(length).position(|window| window.iter().all(Option::is_none))
+        else {
+            continue;
+        };
+
+        for offset in 0..length {
+            disk[destination + offset] = Some(file_id);
+            disk[start + offset] = None;
         }
-
-        checksum(&disk)
     }
+
+    checksum(&disk)
 }

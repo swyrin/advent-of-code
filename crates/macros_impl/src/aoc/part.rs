@@ -1,97 +1,87 @@
-use proc_macro2::TokenStream;
+use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
-use syn::{Error, ItemFn, Type};
+use syn::{Error, ItemFn, ReturnType, Type};
 
-use crate::aoc::sample::{Sample, extract_samples};
+use crate::aoc::sample::{Sample, extract_samples, mark_for_expansion};
 
-/// Representing a part of an Advent of Code day.
-pub struct Part {
-    /// The function of which a part is associated with.  
-    pub function: ItemFn,
-
-    /// Its associated sample tests.
-    ///
-    /// Most Advent of Code days have just one, except some simulation problems.
-    pub samples: Vec<Sample>,
-}
-
-/// Extract functions with the names: `part_one`, and `part_two`
-///
-/// Returns a tuple of `Option`<`Part`>s where:
-///     - First item is `part_one`
-///     - Second item is `part_two`
-///
-/// `None` is, obviously, the named ones does not exist.
-pub fn extract_parts(functions: &[ItemFn]) -> syn::Result<(Option<Part>, Option<Part>)> {
-    let part_one = functions.iter().filter(|func| func.sig.ident == "part_one").collect::<Vec<_>>();
-
-    let p1_impl = if let Some(p1_fn) = part_one.first() {
-        let mut p1_fn = (*p1_fn).clone().to_owned();
-        let samples = extract_samples(&mut p1_fn.attrs)?;
-
-        Some(Part {
-            function: p1_fn,
-            samples,
-        })
-    } else {
-        None
-    };
-
-    let part_two = functions.iter().filter(|func| func.sig.ident == "part_two").collect::<Vec<_>>();
-
-    let p2_impl = if let Some(p2_fn) = part_two.first() {
-        let mut p2_fn = (*p2_fn).to_owned();
-        let samples = extract_samples(&mut p2_fn.attrs)?;
-
-        Some(Part {
-            function: p2_fn,
-            samples,
-        })
-    } else {
-        None
-    };
-
-    Ok((p1_impl, p2_impl))
-}
-
-/// Extract the type of the input struct from the input function.
-///
-/// Usually will be used in conjunction with test "generators".
-pub fn get_input_type_from_function(function: &ItemFn) -> syn::Result<Type> {
-    if function.sig.inputs.len() == 1
-        && let Some(first_arg) = function.sig.inputs.first()
-        && let syn::FnArg::Typed(arg) = first_arg
-        && let syn::Type::Reference(reference) = arg.ty.as_ref()
-    {
-        Ok((*reference.elem).clone())
-    } else {
-        Err(Error::new_spanned(
-            &function.sig,
-            "function must be ONLY ONE input parameter with a reference type.",
-        ))
+pub fn expand(attribute: TokenStream, item: TokenStream) -> syn::Result<TokenStream> {
+    if !attribute.is_empty() {
+        return Err(Error::new(Span::call_site(), "#[part] does not accept arguments"));
     }
+
+    let mut function: ItemFn = syn::parse2(item)?;
+    mark_for_expansion(&mut function.attrs);
+    let samples = extract_samples(&function.attrs)?;
+    let input_type = input_type(&function)?;
+
+    Ok(generate(function, input_type, samples))
 }
 
-/// Generate part function.
-///
-/// If everything is done correctly, this function simply passes
-/// what you have written into `part_one` and/or `part_two` inside `aoc!`
-///
-/// Returns two thing:
-///     - Part definition + tests
-///     - Glue code to put into `main`
-pub fn generate_part(part: Option<Part>, input_type: Option<&Type>) -> (TokenStream, TokenStream) {
-    let (Some(part), Some(input_type)) = (part, input_type) else {
-        return (quote! {}, quote! {});
+fn input_type(function: &ItemFn) -> syn::Result<Type> {
+    let signature = &function.sig;
+
+    if signature.constness.is_some() {
+        return Err(Error::new_spanned(signature, "#[part] functions cannot be const"));
+    }
+
+    if signature.asyncness.is_some() {
+        return Err(Error::new_spanned(signature, "#[part] functions cannot be async"));
+    }
+
+    if matches!(signature.safety, syn::Safety::Unsafe(_)) {
+        return Err(Error::new_spanned(signature, "#[part] functions cannot be unsafe"));
+    }
+
+    if signature.abi.is_some() {
+        return Err(Error::new_spanned(signature, "#[part] functions cannot use an ABI"));
+    }
+
+    if signature.variadic.is_some() {
+        return Err(Error::new_spanned(signature, "#[part] functions cannot be variadic"));
+    }
+
+    if !signature.generics.params.is_empty() {
+        return Err(Error::new_spanned(signature, "#[part] functions cannot be generic"));
+    }
+
+    if matches!(signature.output, ReturnType::Default)
+        || matches!(
+            &signature.output,
+            ReturnType::Type(_, output) if matches!(output.as_ref(), Type::Tuple(tuple) if tuple.elems.is_empty())
+        )
+    {
+        return Err(Error::new_spanned(&signature.output, "#[part] functions must return Display"));
+    }
+
+    let Some(syn::FnArg::Typed(argument)) = signature.inputs.first() else {
+        return Err(Error::new_spanned(
+            &signature.inputs,
+            "#[part] functions must accept exactly one shared reference",
+        ));
     };
 
-    let Part {
-        function,
-        samples,
-    } = part;
+    if signature.inputs.len() != 1 {
+        return Err(Error::new_spanned(
+            &signature.inputs,
+            "#[part] functions must accept exactly one shared reference",
+        ));
+    }
 
+    let Type::Reference(reference) = argument.ty.as_ref() else {
+        return Err(Error::new_spanned(&argument.ty, "#[part] input must be a shared reference"));
+    };
+
+    if reference.mutability.is_some() {
+        return Err(Error::new_spanned(&argument.ty, "#[part] input must be a shared reference"));
+    }
+
+    Ok(*reference.elem.clone())
+}
+
+fn generate(function: ItemFn, input_type: Type, samples: Vec<Sample>) -> TokenStream {
     let function_name = &function.sig.ident;
     let function_name_string = function_name.to_string();
+    let support_name = Ident::new(&format!("__aoc_{function_name}"), Span::call_site());
 
     let tests = samples
         .into_iter()
@@ -99,53 +89,131 @@ pub fn generate_part(part: Option<Part>, input_type: Option<&Type>) -> (TokenStr
         .map(|(index, sample)| {
             let sample_input = sample.input;
             let expected = sample.expected;
-            let part_number = if function_name == "part_one" { 1u8 } else { 2 };
-
-            let test_name = syn::Ident::new(
-                &format!("part_{part_number}_sample_{index}"),
-                proc_macro2::Span::call_site(),
-            );
+            let test_name = Ident::new(&format!("sample_{index}"), Span::call_site());
 
             quote! {
                 #[test]
                 fn #test_name() {
-                    let input: #input_type =
-                        #sample_input
-                            .parse()
-                            .expect(
-                                concat!(
-                                    "Failed to parse sample input for part ",
-                                    #part_number
-                                )
-                            );
+                    let input: #input_type = (#sample_input)
+                        .parse()
+                        .unwrap_or_else(|_| panic!("Failed to parse sample input"));
 
                     let actual = #function_name(&input);
 
                     assert_eq!(
                         actual.to_string(),
-                        #expected.to_string(),
-                        "Part {} sample failed",
-                        #part_number
+                        (#expected).to_string(),
+                        "Sample failed for {}",
+                        #function_name_string,
                     );
                 }
             }
         })
         .collect::<Vec<_>>();
 
-    let run = quote! {
-        println!(
-            "Result of {}: {}",
-            #function_name_string,
-            #function_name(&input)
-        );
+    let test_module = if tests.is_empty() {
+        quote! {
+            #[cfg(test)]
+            mod tests {}
+        }
+    } else {
+        quote! {
+            #[cfg(test)]
+            mod tests {
+                use super::*;
+
+                #(#tests)*
+            }
+        }
     };
 
-    (
-        quote! {
-            #[forbid(unsafe_code)]
-            #function
-            #(#tests)*
-        },
-        run,
-    )
+    quote! {
+        #[forbid(unsafe_code)]
+        #function
+
+        #[doc(hidden)]
+        mod #support_name {
+            use super::*;
+
+            fn run(content: &str) {
+                let input: #input_type = content.parse().unwrap_or_else(|_| {
+                    panic!("Failed to parse input.txt for {}", #function_name_string)
+                });
+
+                let result = super::#function_name(&input);
+
+                println!("Result of {}: {}", #function_name_string, result);
+            }
+
+            ::macros::inventory::submit! {
+                ::macros::AocPart {
+                    name: #function_name_string,
+                    run,
+                }
+            }
+
+            #test_module
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use quote::quote;
+
+    use super::*;
+
+    #[test]
+    fn generates_registration_and_sample_tests() {
+        let output = expand(quote! {}, quote! {
+            #[sample(input = "1", expected = "1")]
+            #[sample(input = "2", expected = "2")]
+            fn part_one(Input { value }: &Input) -> impl std::fmt::Display {
+                value
+            }
+        })
+        .unwrap()
+        .to_string();
+
+        assert!(output.contains("inventory :: submit"));
+        assert!(output.contains("sample_0"));
+        assert!(output.contains("sample_1"));
+        assert!(output.contains("__aoc_part_sample"));
+    }
+
+    #[test]
+    fn rejects_extra_parameter() {
+        let error = expand(quote! {}, quote! {
+            fn part_one(input: &Input, extra: usize) -> impl std::fmt::Display {
+                input.value
+            }
+        })
+        .unwrap_err();
+
+        assert!(error.to_string().contains("exactly one shared reference"));
+    }
+
+    #[test]
+    fn rejects_mutable_input() {
+        let error = expand(quote! {}, quote! {
+            fn part_one(input: &mut Input) -> impl std::fmt::Display {
+                input.value
+            }
+        })
+        .unwrap_err();
+
+        assert!(error.to_string().contains("shared reference"));
+    }
+
+    #[test]
+    fn rejects_attribute_arguments() {
+        let error = expand(quote! { 1 }, quote! {
+            fn part_one(input: &Input) -> impl std::fmt::Display {
+                input.value
+            }
+        })
+        .unwrap_err();
+
+        assert!(error.to_string().contains("does not accept arguments"));
+    }
 }

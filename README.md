@@ -17,11 +17,25 @@ Below are boring things, you have been warned.
 
 -----------------------
 
-# The manual to use Swyrin-branded macros
+## The manual to use Swyrin-branded macros
 
-## Input definition: `AocInput` derive macro
+> [!WARNING]
+> The API isn't stable yet and will change often to fit my taste.
 
-First of all: use `#[derive(AocInput)]` to provide your own input definition (s):
+> [!NOTE]
+> If reading is not something you can do, there exists `examples/template.rs`, or the "Minimum working code" at the
+> bottom of this page
+
+### Input definition: `AocInput` derive macro
+
+Inspired by [`serde`](https://lib.rs/crates/serde) syntax & powered by [`aoc_parse`](https://lib.rs/crates/aoc-parse)
+crate.
+
+> [!WARNING]
+> The implementation of this one is VERY ATROCIOUS since AoC input varies a lot, so everything in this macro is just
+> whack-a-mole game.
+>
+> If it doesn't work, perform manual [`impl std::str::FromStr`](https://doc.rust-lang.org/std/str/trait.FromStr.html).
 
 ```rust
 #[derive(AocInput)]
@@ -31,40 +45,55 @@ struct Input {
 }
 ```
 
-(powered by [`aoc_parse`](https://lib.rs/crates/aoc-parse), so give them a praise)
+### Program definition: `aoc!` & `part` proc macros
 
-(yes, the APIs are inspired by the glorious [`serde`](https://lib.rs/crates/serde))
+You may want to use the `aoc!` macro to not having to write `fn main()`
+with `input.txt` reading and processing every time. It will collect the `#[part]` functions thanks to the existence of [
+`inventory`](https://docs.rs/crate/inventory/latest)
 
-### Constraints
+Each `#[part]` function must:
 
-- Struct fields are parsed like the order shown in struct.
+- Not:
+    - `extern "C"` because why would you do that?
+    - `unsafe`
+    - `async`
+    - `const`, I am not stuttering: https://doc.rust-lang.org/reference/const_eval.html#const-functions
+    - Having generic, like `part_one<T>(input: &T)`, had enough w/ lifetimes.
+    - Having variadic, like `part_one(input: &Input)`
+- Have ONE parameter, that is borrowed input type.
+- The input type must [`impl std::str::FromStr`](https://doc.rust-lang.org/std/str/trait.FromStr.html)
+    - `#[derive(AocInput)]` will do that one for you.
+- The return value of that function must [
+  `impl std::fmt::Display`](https://doc.rust-lang.org/std/fmt/trait.Display.html)
 
-> [!WARNING]
-> The implementation of this one is VERY ATROCIOUS since AoC input varies a lot, so everything in this macro is just
-> whack-a-mole game.
->
-> If it doesn't work, perform manual [`impl std::str::FromStr`](https://doc.rust-lang.org/std/str/trait.FromStr.html).
+Each `#[part]` will:
 
-### Program definition: `aoc!` proc macro
+- Generate a `#[cfg(test)] mod tests`
+- Collect its sample tests from `#[sample(...)]`s placed
+  underneath & write directly to that module.
 
-You may want to use `aoc!` macro to reduce the boilerplate of having to define `fn main()`
-with input reading and writing personalized results every time.
+### Minimum working code
 
-This one accepts two functions only with the name of `part_one` and `part_two`.
+```rust
+use macros::{AocInput, aoc, part, sample};
 
-To provide a sample input, simply put `#[sample(input, expected)]` on top of the part function.
+#[derive(AocInput)]
+struct Input {
+    #[parse(line(u32+))]
+    pub(crate) numbers: Vec<u32>
+}
 
-> [!TIP]
-> The functions `part_{one,two}` must:
->
-> - Accept a struct with [`std::str::FromStr`](https://doc.rust-lang.org/std/str/trait.FromStr.html) as supertrait.
->   - Same for `input` in `#[sample]`
-> - Return data with [`std::fmt::Display`](https://doc.rust-lang.org/std/fmt/trait.Display.html) as supertrait.
->   - Same for `expected` in `#[sample]`.
->
-> ```rust
-> aoc! {
->    #[sample(input = "a", expected = "b")]
->    fn part_one(Input { .. }: &Input) -> impl std::fmt::Display {}    
-> }
-> ```
+aoc!();
+
+#[part]
+#[sample(input = "1", expected = "1")]
+#[sample(input = "2", expected = "2")]
+fn part_one(input: &Input) -> impl std::fmt::Display {
+    input.numbers[0]
+}
+
+#[part]
+fn part_two(input: &Input) -> impl std::fmt::Display {
+    input.numbers.len()
+}
+```

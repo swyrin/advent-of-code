@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use itertools::Itertools;
-use macros::{AocInput, aoc};
+use macros::{AocInput, aoc, part, sample};
 
 type Position = (isize, isize);
 
@@ -56,10 +56,11 @@ impl Input {
         (0..self.rows()).contains(&row) && (0..self.columns()).contains(&column)
     }
 }
+aoc!();
 
-aoc! {
-    #[sample(
-        input = "............
+#[part]
+#[sample(
+    input = "............
 ........0...
 .....0......
 .......0....
@@ -71,25 +72,30 @@ aoc! {
 .........A..
 ............
 ............",
-        expected = "14"
-    )]
-    fn part_one(input @ Input { .. }: &Input) -> impl std::fmt::Display {
-        let mut antinodes = HashSet::new();
-        let antennas = input.antennas();
+    expected = "14"
+)]
+fn part_one(
+    input @ Input {
+        ..
+    }: &Input,
+) -> impl std::fmt::Display {
+    let mut antinodes = HashSet::new();
+    let antennas = input.antennas();
 
-        for locations in antennas.values() {
-            for [first, second] in locations.iter().copied().array_combinations() {
-                let delta = (second.0 - first.0, second.1 - first.1);
-                antinodes.insert((first.0 - delta.0, first.1 - delta.1));
-                antinodes.insert((second.0 + delta.0, second.1 + delta.1));
-            }
+    for locations in antennas.values() {
+        for [first, second] in locations.iter().copied().array_combinations() {
+            let delta = (second.0 - first.0, second.1 - first.1);
+            antinodes.insert((first.0 - delta.0, first.1 - delta.1));
+            antinodes.insert((second.0 + delta.0, second.1 + delta.1));
         }
-
-        antinodes.into_iter().filter(|&position| input.in_bounds(position)).count()
     }
 
-    #[sample(
-        input = "............
+    antinodes.into_iter().filter(|&position| input.in_bounds(position)).count()
+}
+
+#[part]
+#[sample(
+    input = "............
 ........0...
 .....0......
 .......0....
@@ -101,30 +107,33 @@ aoc! {
 .........A..
 ............
 ............",
-        expected = "34"
-    )]
-    fn part_two(input @ Input { .. }: &Input) -> impl std::fmt::Display {
-        let mut antinodes = HashSet::new();
-        let antennas = input.antennas();
+    expected = "34"
+)]
+fn part_two(
+    input @ Input {
+        ..
+    }: &Input,
+) -> impl std::fmt::Display {
+    let mut antinodes = HashSet::new();
+    let antennas = input.antennas();
 
-        for locations in antennas.values() {
-            for [first, second] in locations.iter().copied().array_combinations() {
-                let delta = (second.0 - first.0, second.1 - first.1);
+    for locations in antennas.values() {
+        for [first, second] in locations.iter().copied().array_combinations() {
+            let delta = (second.0 - first.0, second.1 - first.1);
 
-                let mut position = first;
-                while input.in_bounds(position) {
-                    antinodes.insert(position);
-                    position = (position.0 - delta.0, position.1 - delta.1);
-                }
+            let mut position = first;
+            while input.in_bounds(position) {
+                antinodes.insert(position);
+                position = (position.0 - delta.0, position.1 - delta.1);
+            }
 
-                let mut position = second;
-                while input.in_bounds(position) {
-                    antinodes.insert(position);
-                    position = (position.0 + delta.0, position.1 + delta.1);
-                }
+            let mut position = second;
+            while input.in_bounds(position) {
+                antinodes.insert(position);
+                position = (position.0 + delta.0, position.1 + delta.1);
             }
         }
-
-        antinodes.len()
     }
+
+    antinodes.len()
 }

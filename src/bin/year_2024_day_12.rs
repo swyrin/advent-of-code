@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use macros::{AocInput, aoc};
+use macros::{AocInput, aoc, part, sample};
 
 type Position = (isize, isize);
 
@@ -111,10 +111,11 @@ fn side_count(region: &HashSet<Position>) -> usize {
         })
         .sum()
 }
+aoc!();
 
-aoc! {
-    #[sample(
-        input = "RRRRIICCFF
+#[part]
+#[sample(
+    input = "RRRRIICCFF
 RRRRIICCCF
 VVRRRCCFFF
 VVRCCCJFFF
@@ -124,14 +125,19 @@ VVIIICJJEE
 MIIIIIJJEE
 MIIISIJEEE
 MMMISSJEEE",
-        expected = "1930"
-    )]
-    fn part_one(input @ Input { .. }: &Input) -> impl std::fmt::Display {
-        input.regions().into_iter().map(|region| region.len() * perimeter(&region)).sum::<usize>()
-    }
+    expected = "1930"
+)]
+fn part_one(
+    input @ Input {
+        ..
+    }: &Input,
+) -> impl std::fmt::Display {
+    input.regions().into_iter().map(|region| region.len() * perimeter(&region)).sum::<usize>()
+}
 
-    #[sample(
-        input = "RRRRIICCFF
+#[part]
+#[sample(
+    input = "RRRRIICCFF
 RRRRIICCCF
 VVRRRCCFFF
 VVRCCCJFFF
@@ -141,9 +147,12 @@ VVIIICJJEE
 MIIIIIJJEE
 MIIISIJEEE
 MMMISSJEEE",
-        expected = "1206"
-    )]
-    fn part_two(input @ Input { .. }: &Input) -> impl std::fmt::Display {
-        input.regions().into_iter().map(|region| region.len() * side_count(&region)).sum::<usize>()
-    }
+    expected = "1206"
+)]
+fn part_two(
+    input @ Input {
+        ..
+    }: &Input,
+) -> impl std::fmt::Display {
+    input.regions().into_iter().map(|region| region.len() * side_count(&region)).sum::<usize>()
 }

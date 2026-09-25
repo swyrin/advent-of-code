@@ -1,4 +1,4 @@
-use macros::{AocInput, aoc};
+use macros::{AocInput, aoc, part, sample};
 use range_set_blaze::RangeSetBlaze;
 
 #[derive(AocInput)]
@@ -8,10 +8,11 @@ struct Input {
     #[parse(section(lines(i64)))]
     pub(crate) numbers: Vec<i64>,
 }
+aoc!();
 
-aoc! {
-    #[sample(
-        input = "3-5
+#[part]
+#[sample(
+    input = "3-5
 10-14
 16-20
 12-18
@@ -22,14 +23,20 @@ aoc! {
 11
 17
 32",
-        expected = "3"
-    )]
-    fn part_one(Input { ranges, numbers }: &Input) -> impl std::fmt::Display {
-        numbers.iter().filter(|&number| ranges.contains(*number)).count()
-    }
+    expected = "3"
+)]
+fn part_one(
+    Input {
+        ranges,
+        numbers,
+    }: &Input,
+) -> impl std::fmt::Display {
+    numbers.iter().filter(|&number| ranges.contains(*number)).count()
+}
 
-    #[sample(
-        input = "3-5
+#[part]
+#[sample(
+    input = "3-5
 10-14
 16-20
 12-18
@@ -40,9 +47,12 @@ aoc! {
 11
 17
 32",
-        expected = "14"
-    )]
-    fn part_two(Input { ranges, .. }: &Input) -> impl std::fmt::Display {
-        ranges.len()
-    }
+    expected = "14"
+)]
+fn part_two(
+    Input {
+        ranges, ..
+    }: &Input,
+) -> impl std::fmt::Display {
+    ranges.len()
 }

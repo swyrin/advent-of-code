@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use itertools::Itertools;
-use macros::{AocInput, aoc};
+use macros::{AocInput, aoc, part, sample};
 use petgraph::unionfind::UnionFind;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
@@ -36,10 +36,11 @@ fn sorted_edges(points: &[Point3]) -> Vec<(isize, (usize, usize))> {
         .sorted_unstable_by_key(|(distance, _)| *distance)
         .collect()
 }
+aoc!();
 
-aoc! {
-    #[sample(
-        input = "162,817,812
+#[part]
+#[sample(
+    input = "162,817,812
 57,618,57
 906,360,560
 592,479,940
@@ -59,27 +60,32 @@ aoc! {
 862,61,35
 984,92,344
 425,690,689",
-        expected = "40"
-    )]
-    fn part_one(Input { points }: &Input) -> impl std::fmt::Display {
-        let edges = sorted_edges(points);
-        let connection_count = if points.len() == 20 { 10 } else { 1000 };
-        let mut components = UnionFind::new(points.len());
+    expected = "40"
+)]
+fn part_one(
+    Input {
+        points,
+    }: &Input,
+) -> impl std::fmt::Display {
+    let edges = sorted_edges(points);
+    let connection_count = if points.len() == 20 { 10 } else { 1000 };
+    let mut components = UnionFind::new(points.len());
 
-        for &(_, (a, b)) in edges.iter().take(connection_count) {
-            components.union(a, b);
-        }
-
-        let mut component_sizes = HashMap::new();
-        for point in 0..points.len() {
-            *component_sizes.entry(components.find_mut(point)).or_insert(0_usize) += 1;
-        }
-
-        component_sizes.values().sorted_unstable().rev().take(3).product::<usize>()
+    for &(_, (a, b)) in edges.iter().take(connection_count) {
+        components.union(a, b);
     }
 
-    #[sample(
-        input = "162,817,812
+    let mut component_sizes = HashMap::new();
+    for point in 0..points.len() {
+        *component_sizes.entry(components.find_mut(point)).or_insert(0_usize) += 1;
+    }
+
+    component_sizes.values().sorted_unstable().rev().take(3).product::<usize>()
+}
+
+#[part]
+#[sample(
+    input = "162,817,812
 57,618,57
 906,360,560
 592,479,940
@@ -99,23 +105,26 @@ aoc! {
 862,61,35
 984,92,344
 425,690,689",
-        expected = "25272"
-    )]
-    fn part_two(Input { points }: &Input) -> impl std::fmt::Display {
-        let edges = sorted_edges(points);
-        let mut components = UnionFind::new(points.len());
-        let mut component_count = points.len();
+    expected = "25272"
+)]
+fn part_two(
+    Input {
+        points,
+    }: &Input,
+) -> impl std::fmt::Display {
+    let edges = sorted_edges(points);
+    let mut components = UnionFind::new(points.len());
+    let mut component_count = points.len();
 
-        for (_, (a, b)) in edges {
-            if components.union(a, b) {
-                component_count -= 1;
-            }
-
-            if component_count == 1 {
-                return points[a].x * points[b].x;
-            }
+    for (_, (a, b)) in edges {
+        if components.union(a, b) {
+            component_count -= 1;
         }
 
-        unreachable!("all points should eventually be connected")
+        if component_count == 1 {
+            return points[a].x * points[b].x;
+        }
     }
+
+    unreachable!("all points should eventually be connected")
 }

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use macros::{AocInput, aoc};
+use macros::{AocInput, aoc, part, sample};
 
 #[derive(AocInput)]
 struct Input {
@@ -55,21 +55,24 @@ fn simulate(numbers: &[i64], days: i64) -> i64 {
 
     fishes.values().sum::<i64>()
 }
+aoc!();
 
-aoc! {
-    #[sample(
-        input = "3,4,3,1,2",
-        expected = "5934"
-    )]
-    fn part_one(Input { numbers }: &Input) -> impl std::fmt::Display {
-        simulate(numbers, 80)
-    }
+#[part]
+#[sample(input = "3,4,3,1,2", expected = "5934")]
+fn part_one(
+    Input {
+        numbers,
+    }: &Input,
+) -> impl std::fmt::Display {
+    simulate(numbers, 80)
+}
 
-    #[sample(
-        input = "3,4,3,1,2",
-        expected = "26984457539"
-    )]
-    fn part_two(Input { numbers }: &Input) -> impl std::fmt::Display {
-        simulate(numbers, 256)
-    }
+#[part]
+#[sample(input = "3,4,3,1,2", expected = "26984457539")]
+fn part_two(
+    Input {
+        numbers,
+    }: &Input,
+) -> impl std::fmt::Display {
+    simulate(numbers, 256)
 }

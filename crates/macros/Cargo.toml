@@ -5,4 +5,5 @@ edition = "2024"
 
 [dependencies]
 aoc-parse = "0.2.18"
+inventory = "0.3.24"
 macros_impl = { workspace = true }
