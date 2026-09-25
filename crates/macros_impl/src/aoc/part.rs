@@ -135,6 +135,8 @@ fn generate(function: ItemFn, input_type: Type, samples: Vec<Sample>) -> TokenSt
         mod #support_name {
             use super::*;
 
+            fn __aoc_assert_display<T: ::std::fmt::Display>(_: &T) {}
+
             fn run(content: &str) {
                 let input: #input_type = content.parse().unwrap_or_else(|_| {
                     panic!("Failed to parse input.txt for {}", #function_name_string)
@@ -142,6 +144,7 @@ fn generate(function: ItemFn, input_type: Type, samples: Vec<Sample>) -> TokenSt
 
                 let result = super::#function_name(&input);
 
+                __aoc_assert_display(&result);
                 println!("Result of {}: {}", #function_name_string, result);
             }
 
@@ -179,6 +182,7 @@ mod tests {
         assert!(output.contains("sample_0"));
         assert!(output.contains("sample_1"));
         assert!(output.contains("__aoc_part_sample"));
+        assert!(output.contains("__aoc_assert_display"));
     }
 
     #[test]
