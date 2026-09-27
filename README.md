@@ -22,6 +22,8 @@ Below are boring things, you have been warned.
 > [!WARNING]
 > The API isn't stable yet and will change often to fit my taste.
 
+Random things I made for my AoC training in Rust:tm:, and felt like it deserves its own traction.
+
 > [!NOTE]
 > If reading is not something you can do, there exists `examples/template.rs`, or the "Minimum working code" at the
 > bottom of this page
@@ -48,23 +50,21 @@ struct Input {
 ### Program definition: `aoc!` & `part` proc macros
 
 You may want to use the `aoc!` macro to not having to write `fn main()`
-with `input.txt` reading and processing every time. It will collect the `#[part]` functions thanks to the existence of [
-`inventory`](https://docs.rs/crate/inventory/latest)
+with `input.txt` reading and processing every time. This macro alone will collect the `#[part]` functions thanks to the existence of [`inventory`](https://docs.rs/crate/inventory/latest).
 
 Each `#[part]` function must:
 
 - Not:
-    - `extern "C"` because why would you do that?
-    - `unsafe`
-    - `async`
-    - `const`, I am not stuttering: https://doc.rust-lang.org/reference/const_eval.html#const-functions
-    - Having generic, like `part_one<T>(input: &T)`, had enough w/ lifetimes.
-    - Having variadic, like `part_one(input: &Input)`
+  - `extern "C"` because why would you do that?
+  - `unsafe`, ensured(TM) by Clippy
+  - `async`
+  - `const`, [I am not stuttering](https://doc.rust-lang.org/reference/const_eval.html#const-functions)
+  - Having generic, like `part_one<T>(input: &T)`, had enough w/ lifetimes.
+  - Having variadic, like `part_one(input: &Input)`
 - Have ONE parameter, that is borrowed input type.
 - The input type must [`impl std::str::FromStr`](https://doc.rust-lang.org/std/str/trait.FromStr.html)
-    - `#[derive(AocInput)]` will do that one for you.
-- The return value of that function must [
-  `impl std::fmt::Display`](https://doc.rust-lang.org/std/fmt/trait.Display.html)
+  - `#[derive(AocInput)]` will do that one for you.
+- The return value of that function must [`impl std::fmt::Display`](https://doc.rust-lang.org/std/fmt/trait.Display.html)
 
 Each `#[part]` will:
 
