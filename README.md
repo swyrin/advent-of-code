@@ -4,7 +4,7 @@ This repository is my Advent of Code solutions, hopefully in Rust.
 
 ## What's inside?
 
-- `src/bin/year_XXXX_day_YY.rs` - Submissions.
+- `calendars/advent_[year]/day_[day].rs` - Submissions.
 - `examples/template.rs` - Scaffold for new submissions.
 
 ## Which years are included?
