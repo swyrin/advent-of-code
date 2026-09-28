@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
+use aoc_prelude::petgraph::graph::{DiGraph, NodeIndex};
+use aoc_prelude::petgraph::visit::Bfs;
 use macros::{AocInput, aoc, part, sample};
-use petgraph::graph::{DiGraph, NodeIndex};
-use petgraph::visit::Bfs;
 
 #[derive(AocInput)]
 struct Input {

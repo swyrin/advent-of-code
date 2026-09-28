@@ -1,7 +1,7 @@
-use counter::Counter;
+use aoc_prelude::counter::Counter;
+use aoc_prelude::swiss_knife::common::math::bin2dec::bin_convert_to_dec_be;
+use aoc_prelude::swiss_knife::common::math::linalg::transpose2;
 use macros::{AocInput, aoc, part, sample};
-use swiss_knife::common::math::bin2dec::bin_convert_to_dec_be;
-use swiss_knife::common::math::linalg::transpose2;
 
 #[derive(AocInput)]
 struct Input {

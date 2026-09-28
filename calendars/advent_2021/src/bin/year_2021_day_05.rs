@@ -1,6 +1,6 @@
-use counter::Counter;
+use aoc_prelude::counter::Counter;
+use aoc_prelude::num::integer::gcd;
 use macros::{AocInput, aoc, part, sample};
-use num::integer::gcd;
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 struct Point(i32, i32);

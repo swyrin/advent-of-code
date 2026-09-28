@@ -1,4 +1,4 @@
-use counter::Counter;
+use aoc_prelude::counter::Counter;
 use macros::{AocInput, aoc, part, sample};
 
 #[derive(AocInput)]

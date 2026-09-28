@@ -1,5 +1,5 @@
-use geo::{Contains, LineString, Point, Polygon, Rect, point};
-use itertools::Itertools;
+use aoc_prelude::geo::{Contains, LineString, Point, Polygon, Rect, point};
+use aoc_prelude::itertools::Itertools;
 use macros::{AocInput, aoc, part, sample};
 
 #[derive(AocInput)]

@@ -1,0 +1,9 @@
+[package]
+name = "advent_2021"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+aoc_prelude.workspace = true
+macros.workspace = true
+macros_impl.workspace = true

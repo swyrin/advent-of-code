@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 use std::hash::RandomState;
 
+use aoc_prelude::petgraph::algo::all_simple_paths;
+use aoc_prelude::petgraph::graph::{DiGraph, NodeIndex};
 use macros::{AocInput, aoc, part, sample};
-use petgraph::algo::all_simple_paths;
-use petgraph::graph::{DiGraph, NodeIndex};
 
 #[derive(Debug, Clone)]
 struct Adjacent {

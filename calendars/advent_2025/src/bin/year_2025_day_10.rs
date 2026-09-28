@@ -1,6 +1,6 @@
 use std::collections::{HashSet, VecDeque};
 
-use good_lp::{
+use aoc_prelude::good_lp::{
     Expression,
     IntoAffineExpression,
     Solution,

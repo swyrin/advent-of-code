@@ -166,5 +166,3 @@ fn part_two(
     // There will always be an odd number of scores to consider.
     scores[scores.len() / 2]
 }
-
-fn test() {}

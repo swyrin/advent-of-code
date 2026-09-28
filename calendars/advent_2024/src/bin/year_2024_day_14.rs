@@ -1,4 +1,4 @@
-use image::{GrayImage, Luma};
+use aoc_prelude::image::{GrayImage, Luma};
 use macros::{AocInput, aoc, part, sample};
 
 const SAMPLE_DIMENSIONS: (i64, i64) = (11, 7);

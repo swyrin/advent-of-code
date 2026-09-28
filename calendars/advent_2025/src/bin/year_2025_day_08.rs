@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use itertools::Itertools;
+use aoc_prelude::itertools::Itertools;
+use aoc_prelude::petgraph::unionfind::UnionFind;
 use macros::{AocInput, aoc, part, sample};
-use petgraph::unionfind::UnionFind;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 struct Point3 {

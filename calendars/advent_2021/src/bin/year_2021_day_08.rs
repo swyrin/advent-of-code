@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use itertools::Itertools;
+use aoc_prelude::itertools::Itertools;
 use macros::{AocInput, aoc, part, sample};
 
 #[derive(AocInput)]
