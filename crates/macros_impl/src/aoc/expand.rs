@@ -4,7 +4,10 @@ use syn::Error;
 
 pub fn expand(input: TokenStream) -> syn::Result<TokenStream> {
     if !input.is_empty() {
-        return Err(Error::new(Span::call_site(), "annotate part functions with #[part]"));
+        return Err(Error::new(
+            Span::call_site(),
+            "annotate part functions with #[part], not inside aoc!{} macro!",
+        ));
     }
 
     Ok(quote! {
