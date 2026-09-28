@@ -1,1 +1,2 @@
-pub mod common;
+pub mod math;
+pub mod matrix_traversal;

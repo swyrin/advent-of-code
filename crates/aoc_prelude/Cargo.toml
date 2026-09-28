@@ -10,5 +10,5 @@ good_lp = { version = "1.15.3", default-features = false, features = ["microlp"]
 image = { version = "0.25.10", default-features = false, features = ["png"] }
 itertools = "0.15.0"
 num = "0.4.3"
-petgraph = { version = "0.8.3", features = ["rayon"] }
+petgraph = "0.8.3"
 range-set-blaze = { version = "0.7.0", default-features = false }

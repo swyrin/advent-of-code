@@ -1,4 +1,4 @@
-use aoc_prelude::swiss_knife::common::math::linalg::transpose2;
+use aoc_prelude::swiss_knife::math::linalg::transpose2;
 use macros::{AocInput, aoc, part, sample};
 
 #[derive(AocInput)]
