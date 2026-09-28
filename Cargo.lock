@@ -9,19 +9,39 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
 
 [[package]]
-name = "advent-of-code"
+name = "advent_2021"
 version = "0.1.0"
 dependencies = [
- "counter",
- "geo",
- "good_lp",
- "image",
- "itertools 0.15.0",
+ "aoc_prelude",
  "macros",
- "num",
- "petgraph",
- "range-set-blaze",
- "swiss_knife",
+ "macros_impl",
+]
+
+[[package]]
+name = "advent_2024"
+version = "0.1.0"
+dependencies = [
+ "aoc_prelude",
+ "macros",
+ "macros_impl",
+]
+
+[[package]]
+name = "advent_2025"
+version = "0.1.0"
+dependencies = [
+ "aoc_prelude",
+ "macros",
+ "macros_impl",
+]
+
+[[package]]
+name = "advent_of_code"
+version = "0.1.0"
+dependencies = [
+ "aoc_prelude",
+ "macros",
+ "macros_impl",
 ]
 
 [[package]]
@@ -51,6 +71,20 @@ dependencies = [
  "regex",
  "thiserror",
  "tuple_utils",
+]
+
+[[package]]
+name = "aoc_prelude"
+version = "0.1.0"
+dependencies = [
+ "counter",
+ "geo",
+ "good_lp",
+ "image",
+ "itertools 0.15.0",
+ "num",
+ "petgraph",
+ "range-set-blaze",
 ]
 
 [[package]]
@@ -880,10 +914,6 @@ name = "stable_deref_trait"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
-
-[[package]]
-name = "swiss_knife"
-version = "0.1.0"
 
 [[package]]
 name = "syn"

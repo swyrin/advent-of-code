@@ -1,33 +1,24 @@
 [package]
-name = "advent-of-code"
+name = "advent_of_code"
 version = "0.1.0"
 edition = "2024"
 publish = false
 license-file = "LICENSE.md"
-description = "Random BS go stuffs for Advent of Code."
 repository = "https://github.com/swyrin/advent-of-code"
 authors = ["Tien Dat Pham <hello@swyrin.me>"]
-default-run = "advent-of-code"
 
 [workspace]
-members = [".", "crates/macros", "crates/macros_impl", "crates/swiss_knife"]
+members = ["calendars/advent_2021", "calendars/advent_2024", "calendars/advent_2025", "crates/aoc_prelude", "crates/macros", "crates/macros_impl"]
 
 [workspace.dependencies]
+aoc_prelude = { path = "crates/aoc_prelude" }
 macros = { path = "crates/macros" }
 macros_impl = { path = "crates/macros_impl" }
-swiss_knife = { path = "crates/swiss_knife" }
 
 [dependencies]
-counter = "0.7.1"
-geo = "0.33.1"
-good_lp = { version = "1.15.3", default-features = false, features = ["microlp"] }
-image = { version = "0.25.10", default-features = false, features = ["png"] }
-itertools = "0.15.0"
-macros = { workspace = true }
-num = "0.4.3"
-petgraph = { version = "0.8.3", features = ["rayon"] }
-range-set-blaze = { version = "0.7.0", default-features = false }
-swiss_knife = { workspace = true }
+aoc_prelude.workspace = true
+macros.workspace = true
+macros_impl.workspace = true
 
 [lints.cargo]
 # https://github.com/rust-lang/cargo/issues/17449#issuecomment-5577945337
