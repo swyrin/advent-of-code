@@ -1,5 +1,5 @@
-use macros::{AocInput, aoc, part, sample};
 use aoc_prelude::range_set_blaze::RangeSetBlaze;
+use macros::{AocInput, aoc, part, sample};
 
 #[derive(AocInput)]
 struct Input {
